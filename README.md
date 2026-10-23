@@ -1,6 +1,24 @@
 # ***"Untitled" Project X***
 Technical Fixes and Enhancements for ***Final Fantasy X | X-2 HD Remaster***
 
+### Steam 2026 compatibility fork
+
+This fork fixes the FFX x2/x4/x8 speed-boost crash with Steam build `25501027`.
+The updated executable moved the game-tick and audio functions. UnX now finds
+their entry points with unique instruction signatures and checks hook and
+memory operations before applying a patch. The affected quick-load, time-stop,
+and cheat targets have also been updated.
+
+For an existing UnX installation, close the game, back up `unx.dll`, and replace
+it with the Win32 DLL from this fork's release. Keep the legacy Special K
+`dxgi.dll` supplied with UnX. Cycle FFX speed with **Ctrl+Shift+H** or your
+configured controller shortcut.
+
+See [build and test instructions](BUILD.md) and the
+[compatibility and validation notes](COMPATIBILITY.md).
+
+---
+
 Originally envisioned as a quick-fix solution for a few technical problems in the otherwise excellent PC port of ***Final Fantasy X | X-2 HD Remaster***, this mod aims to customize some of the game's internal working systems such as cutscene skipping, UI and language selection. The "fix" part of the mod should still be very minimal, but there is still room to polish off many aspects of gameplay.
 
 This mod is derived partially from work done on language selection by the Steam community; refer to `AUTHORS`. _If you find your name in there (Steam username) and would like to be credited differently, please let me know on Steam._

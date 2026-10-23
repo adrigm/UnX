@@ -26,6 +26,7 @@
 #include "config.h"
 #include "log.h"
 #include "hook.h"
+#include "game_memory.h"
 
 #include "cheat.h"
 
@@ -98,6 +99,70 @@ unx::window_state_s
 bool shutting_down = false;
 bool last_active   = unx::window.active;
 
+static void
+UNX_RunScheduledLoad (void)
+{
+  if (game_type != GAME_FFX)
+    return;
+
+  using LoadMode_pfn = int  (__cdecl *)(int);
+  using LoadFlag_pfn = void (__cdecl *)(int);
+  static LoadMode_pfn load_mode = nullptr;
+  static LoadFlag_pfn load_flag = nullptr;
+  static bool resolved = false;
+
+  if (! resolved)
+  {
+    resolved = true;
+    // Relative calls and relocated absolute operands vary between game builds.
+    // These identify the original load entry points without guessing an RVA.
+    static const uint8_t mode_signature [] = {
+      0x55, 0x8b, 0xec, 0x56, 0xe8, 0, 0, 0, 0,
+      0x8b, 0x75, 0x08, 0x85, 0xc0, 0x74, 0x4b,
+      0x81, 0xfe, 0x00, 0x00, 0x10, 0x40, 0x74, 0x08,
+      0x81, 0xfe, 0x00, 0x00, 0x20, 0x40, 0x75, 0x3b
+    };
+    static const uint8_t flag_signature [] = {
+      0x55, 0x8b, 0xec, 0x8b, 0x45, 0x08, 0xa3, 0, 0, 0, 0,
+      0x85, 0xc0, 0x75, 0x12, 0x50, 0xa3, 0, 0, 0, 0, 0xe8
+    };
+    const auto mode = unx::game_memory::FindUniqueExecutableSignature (
+      mode_signature, "xxxxx????xxxxxxxxxxxxxxxxxxxxxxx", sizeof mode_signature);
+    const auto flag = unx::game_memory::FindUniqueExecutableSignature (
+      flag_signature, "xxxxxxx????xxxxxx????x", sizeof flag_signature);
+
+    bool valid_flag = false;
+    if (flag.address != nullptr)
+    {
+      uint32_t primary_flag = 0;
+      uint32_t secondary_flag = 0;
+      memcpy (&primary_flag, flag.address + 7, sizeof primary_flag);
+      memcpy (&secondary_flag, flag.address + 17, sizeof secondary_flag);
+      valid_flag = secondary_flag == primary_flag + sizeof (int) &&
+        unx::game_memory::IsWritableImageAddress (
+          reinterpret_cast <void*> (primary_flag), 2 * sizeof (int));
+    }
+
+    if (mode.address != nullptr && valid_flag)
+    {
+      load_mode = reinterpret_cast <LoadMode_pfn> (mode.address);
+      load_flag = reinterpret_cast <LoadFlag_pfn> (flag.address);
+      dll_log->Log (L"[ Quickload ] Resolved mode=%p, flag setter=%p",
+                    mode.address, flag.address);
+    }
+    else
+      dll_log->Log (L"[ Quickload ] Disabled: mode matches=%u, flag matches=%u, writable flag=%i",
+                    static_cast <unsigned int> (mode.count),
+                    static_cast <unsigned int> (flag.count), valid_flag);
+  }
+
+  if (load_mode != nullptr && load_flag != nullptr)
+  {
+    load_flag (1);
+    load_mode (3);
+  }
+}
+
 LRESULT
 CALLBACK
 DetourWindowProc ( _In_  HWND   hWnd,
@@ -107,42 +172,9 @@ DetourWindowProc ( _In_  HWND   hWnd,
 {
   unx::window.hwnd = hWnd;
 
-  extern LPVOID __UNX_base_img_addr;
-
-  if (schedule_load)
+  if (InterlockedExchange (&schedule_load, FALSE))
   {
-    schedule_load = false;
-
-    using LoadSave_pfn    = int (__stdcall *)(void);
-    using LoadSave2_pfn   = int (__cdecl   *)(int);
-    using LoadSave3_pfn   = int (__stdcall *)(void);
-    using LoadSaveXXX_pfn = int (__cdecl   *)(int);
-
-    ///LoadSave_pfn LoadSave =
-    ///  (LoadSave_pfn)
-    ///    ((intptr_t)__UNX_base_img_addr + 0x248910);
-    ///
-    ///LoadSave2_pfn LoadSave2 =
-    ///  (LoadSave2_pfn)
-    ///    ((intptr_t)__UNX_base_img_addr + 0x248890);
-    ///
-    ///LoadSave3_pfn LoadSave3 =
-    ///  (LoadSave3_pfn)
-    ///    ((intptr_t)__UNX_base_img_addr + 0x230DE0);
-
-    auto LoadSaveXXX =
-      (LoadSaveXXX_pfn)
-        ((intptr_t)__UNX_base_img_addr + 0x421870);
-
-    //*(int *)((intptr_t)__UNX_base_img_addr + 0xCE72D0) = 0;
-      *(int *)((intptr_t)__UNX_base_img_addr + 0x8CB994) = 1;
-
-    LoadSaveXXX (3);
-
-//    LoadSave  ();
-//    LoadSave2 (1);
-//    LoadSave2 (2);
-//    LoadSave3 ();
+    UNX_RunScheduledLoad ();
   }
 
 
