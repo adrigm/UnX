@@ -1,0 +1,17 @@
+{
+  "tag": "v0.10.0",
+  "mod_version": "0.10.0",
+  "manager_version": "1.0.1",
+  "source_commit": "6acacf0e19742ecf597b9f2d701c3304ef499067",
+  "build_run_id": 40016762825,
+  "sha256": {
+    "UnX-Manager-1.0.1-windows-x64.exe": "2b111ccb198a9ecbd589f9d7e917ccb8c43ef083c3ef7e4a1cfb5d134b60b107",
+    "UnX-Manager-1.0.1-windows-x64.exe.sha256": "61137ce5b8873c447a1782e62d45f5aa11d626bee997315d4d06e63c1d5979bb",
+    "payload-manifest.json": "48ca9379f48cbcb39560406d8310a49e5789fc22c8e97575a83b53f641b62020",
+    "UnX-0.10.0.zip.sha256": "f1363b4bd5f3c596d5a5c89650a797318f54628cc8931f2b2aa7c836f96f643e",
+    "UnX-0.10.0.zip": "7addbfdf9ff2400ccfbae211d7eaa5fdc402b2058902a04396c2e1cb8bafb7da",
+    "UnX-Manager-1.0.1-linux-x86_64.AppImage": "5c5480d118323c55c89b359f1889be01d98437d877414ab3d54a0aec553bace5",
+    "UnX-Manager-1.0.1-linux-x86_64.AppImage.sha256": "59b4abae25c3d6f65274da1bef458c6aef8fa947d95915fd20eabe4e6fa02860"
+  },
+  "notes_path": "docs/RELEASE-0.10.0.md"
+}
