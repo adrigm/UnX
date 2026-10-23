@@ -74,5 +74,6 @@ without publishing a GitHub release. Build outputs are under
 repository root with `node scripts/smoke-launcher.cjs --packaged` (use an X
 display or Xvfb on Linux).
 
-The renderer has no Node integration, uses context isolation and sandboxing,
-loads only bundled files, and communicates through an explicit preload API.
+The renderer has no Node integration, uses context isolation, loads only
+bundled files, and communicates through an explicit preload API. See
+[packaging notes](docs/PACKAGING.md) for the Linux wrapper and validation limits.
