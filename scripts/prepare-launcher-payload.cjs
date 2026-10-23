@@ -94,6 +94,22 @@ async function getBaseline(options, baseline) {
   return destination;
 }
 
+async function ensureBundledExtractorExecutable(binary, packageRoot, options = {}) {
+  if ((options.platform || process.platform) === 'win32' || !path.isAbsolute(binary)) return false;
+  const relative = path.relative(packageRoot, binary);
+  if (!relative || relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+    throw new Error('Refusing to change permissions outside the bundled 7-Zip package.');
+  }
+  const io = options.fs || fsp;
+  const stat = await io.lstat(binary);
+  if (!stat.isFile() || stat.isSymbolicLink()) throw new Error('The bundled 7-Zip executable is not a regular file.');
+  // npm can unpack 7zip-bin's Linux binary as 0644. Restore only its owner's
+  // execute bit; do not chmod a system command or broaden group/other access.
+  if (stat.mode & 0o100) return false;
+  await io.chmod(binary, (stat.mode & 0o7777) | 0o100);
+  return true;
+}
+
 async function walkFiles(root, current = root) {
   const files = [];
   for (const entry of await fsp.readdir(current, { withFileTypes: true })) {
@@ -180,6 +196,9 @@ async function main() {
   const launcherRequire = createRequire(path.join(repoRoot, 'launcher', 'package.json'));
   const { path7za } = launcherRequire('7zip-bin');
   const AdmZip = launcherRequire('adm-zip');
+  if (await ensureBundledExtractorExecutable(path7za, path.dirname(launcherRequire.resolve('7zip-bin')))) {
+    console.log('Restored owner execute permission on the bundled 7-Zip binary.');
+  }
   const archive = await getBaseline(options, lock.baseline);
   await fsp.mkdir(artifactsRoot, { recursive: true });
   const stage = await fsp.mkdtemp(path.join(artifactsRoot, '.payload-stage-'));
@@ -265,7 +284,11 @@ async function main() {
   }
 }
 
-main().catch(error => {
-  console.error(`Payload preparation failed: ${error.message}`);
-  process.exitCode = 1;
-});
+module.exports = { ensureBundledExtractorExecutable };
+
+if (require.main === module) {
+  main().catch(error => {
+    console.error(`Payload preparation failed: ${error.message}`);
+    process.exitCode = 1;
+  });
+}

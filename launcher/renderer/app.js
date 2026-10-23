@@ -36,7 +36,7 @@ function defaults() { return Object.fromEntries(state.schema.settings.map((setti
 function refreshFooter() {
   const changed = dirty();
   $('save-dot').className = `save-dot ${changed ? 'dirty' : installed() ? 'saved' : ''}`;
-  $('save-title').textContent = changed ? 'You have unapplied changes' : state.inspection?.readyToPlay ? 'Your configuration is up to date' : installed() ? 'Your installation needs attention' : 'Make yourself at home';
+  $('save-title').textContent = changed ? 'Unapplied changes' : state.inspection?.readyToPlay ? 'Settings saved' : installed() ? 'Installation needs attention' : 'UnX is not installed';
   $('save-note').textContent = state.busy ? 'Please keep the app open until this operation finishes.' : changed ? 'Apply your changes before starting the game.' : installed() && !state.inspection?.readyToPlay ? 'Review the installation notes and finish setup.' : installed() ? 'Close the game before changing its configuration.' : 'Choose your preferences, then install UnX.';
   $('apply-settings').textContent = !installed() ? 'Install & apply settings' : needsInstall() ? 'Update & apply settings' : 'Apply settings';
   $('apply-settings').disabled = state.busy || !valid() || (needsInstall() && !state.payloadAvailable);
@@ -96,7 +96,8 @@ function updateDestination() {
   refreshFooter();
 }
 async function refreshFolder(gameDir) {
-  state.gameDir = gameDir; state.inspection = await api.inspect(gameDir);
+  state.gameDir = gameDir; state.inspection = null; state.settingsWarnings = []; updateDestination();
+  state.inspection = await api.inspect(gameDir);
   if (valid()) {
     const loaded = await api.loadSettings(gameDir);
     state.settingsWarnings = loaded.warnings || [];
@@ -133,34 +134,22 @@ function renderSetup(content) {
   const grid = element('div', 'setup-grid');
   const installation = element('article', 'panel');
   const game = element('div', 'install-illustration'); const copy = element('div', 'game-description');
-  copy.append(element('strong', '', 'Final Fantasy X / X-2 HD Remaster'), element('small', '', 'A familiar world. A smoother experience.'));
+  copy.append(element('strong', '', 'Final Fantasy X / X-2 HD Remaster'));
   game.append(element('div', 'game-tile', 'X'), copy); installation.append(game);
-  installation.append(element('h2', '', state.inspection?.readyToPlay ? 'Your journey is ready.' : installed() ? 'Let’s finish your setup.' : 'Everything you need, in one place.'));
-  installation.append(element('p', '', installed() ? 'Choose a settings page to fine-tune UnX. Reinstall the verified files whenever you need a fresh start.' : 'The complete UnX runtime is included. Choose your game folder, adjust your preferences, and install.'));
+  installation.append(element('h2', '', state.inspection?.readyToPlay ? 'UnX is installed' : installed() ? 'Update or repair UnX' : 'Install UnX'));
+  installation.append(element('p', '', installed() ? 'Edit settings in the sidebar, then apply your changes.' : 'Select the game folder, configure your settings, then click Install & apply settings.'));
   installation.append(checkList([
-    'Fixed x2, x4 and x8 speed boosts for the updated Steam game',
-    'Gameplay, languages, controller shortcuts and visual settings',
-    'Automatic file backups before installation or configuration changes',
-    'Your existing texture mods and unrelated configuration are preserved'
+    'Complete mod package included — works offline',
+    'Automatic backups before changes',
+    'Existing texture mods and custom settings preserved'
   ]));
   grid.append(installation);
-  const overview = element('article', 'panel'); overview.append(element('h2', '', 'Installation overview'), element('p', '', 'A quick check before you head back to Spira.'));
+  const overview = element('article', 'panel'); overview.append(element('h2', '', 'Installation details'));
   overview.append(summaryLine('Platform', state.platform === 'linux' ? 'Linux · Steam / Proton' : 'Windows · Steam'), summaryLine('Mod version', '0.9.2.1'), summaryLine('Offline package', state.payloadAvailable ? 'Included' : 'Not prepared'), summaryLine('Backup protection', 'Automatic'), summaryLine('Configuration', `${state.schema.settings.length} available settings`));
   const warningItems = warnings();
   if (warningItems.length) { const list = element('ul', 'warning-list'); for (const warning of warningItems) list.append(element('li', '', warning)); overview.append(list); }
   if (!state.payloadAvailable) overview.append(element('p', 'footnote', 'The developer payload has not been prepared. Build the bundled runtime before installing.'));
   grid.append(overview); content.append(grid);
-  content.append(sectionTitle('Make it feel like your game', 'Start with the details that matter to you.', 'CUSTOMIZE YOUR EXPERIENCE'));
-  const features = element('div', 'feature-grid');
-  for (const feature of [
-    { page: 'gameplay', icon: '⌁', title: 'Less grind. More adventure.', text: 'Share AP with the whole party, tune speed boosts, or enable permanent Sensor.' },
-    { page: 'languages', icon: '文', title: 'Hear Spira your way.', text: 'Choose English or Japanese voices, sound effects and videos, with per-game overrides.' },
-    { page: 'input', icon: '⌘', title: 'Your controller. Your rules.', text: 'Choose button icons and customize keyboard shortcuts and controller combinations.' }
-  ]) {
-    const card = button('', 'feature-card', () => selectPage(feature.page));
-    card.append(element('span', 'feature-icon', feature.icon), element('span', 'arrow', '↗'), element('strong', '', feature.title), element('p', '', feature.text)); features.append(card);
-  }
-  content.append(features, element('p', 'footnote', 'UnX changes the PC version of the game. Gameplay boosters apply to Final Fantasy X where indicated. Close the game before applying changes.'));
 }
 function changeSetting(setting, value, card) {
   state.values[setting.id] = value;
@@ -288,9 +277,9 @@ function renderMaintenance(content) {
 function renderPage() {
   renderNavigation();
   const searching = Boolean(state.search.trim()); const category = state.schema.categories.find((item) => item.id === state.page);
-  $('eyebrow').textContent = searching ? 'FIND YOUR PREFERENCE' : state.page === 'setup' ? 'MAKE IT YOUR GAME' : state.page === 'maintenance' ? 'KEEP YOUR JOURNEY RUNNING' : 'CONFIGURE YOUR EXPERIENCE';
-  $('page-title').textContent = searching ? 'Find the right setting.' : state.page === 'setup' ? 'A better journey through Spira.' : state.page === 'maintenance' ? 'A little care goes a long way.' : titleFor(state.page);
-  $('page-description').textContent = searching ? `Searching ${state.schema.settings.length} settings across your entire configuration.` : category?.description || (state.page === 'setup' ? 'Install UnX, tune your experience, and get straight to the game.' : 'Repair, restore and diagnose your UnX installation.');
+  $('eyebrow').textContent = 'UNX MANAGER';
+  $('page-title').textContent = searching ? 'Search settings' : state.page === 'setup' ? 'Setup & installation' : state.page === 'maintenance' ? 'Backups & tools' : titleFor(state.page);
+  $('page-description').textContent = searching ? `Search all ${state.schema.settings.length} settings.` : category?.description || (state.page === 'setup' ? 'Install and configure UnX for Final Fantasy X / X-2 HD Remaster.' : 'Repair, restore or remove UnX.');
   $('breadcrumb').replaceChildren(document.createTextNode('Workspace '), element('span', '', '/'), document.createTextNode(searching ? ' Search' : state.page === 'setup' ? ' Setup' : ' ' + titleFor(state.page)));
   const content = $('content'); content.replaceChildren();
   if (searching) renderSettings(content);
@@ -318,7 +307,7 @@ async function installOrSave(forceInstall = false) {
 async function launchGame(target = 'launcher') {
   if (dirty()) { notice('Apply your pending changes before launching the game.', 'warning'); return; }
   if (state.inspection?.readyToPlay !== true) { notice('Install or repair UnX and resolve the installation notes before playing.', 'warning'); return; }
-  await run('Starting the game through your installation…', async () => { await api.launchGame(state.gameDir, target); notice('The game is starting. Enjoy your journey.'); });
+  await run('Starting the game…', async () => { await api.launchGame(state.gameDir, target); notice('The game is starting.'); });
 }
 $('browse-folder').addEventListener('click', async () => { try { const folder = await api.chooseFolder(); if (folder) await chooseFolder(folder); } catch (error) { notice(messageOf(error), 'error'); } });
 $('inspect-folder').addEventListener('click', () => chooseFolder($('game-folder').value.trim()));
