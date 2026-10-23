@@ -9,6 +9,10 @@ their entry points with unique instruction signatures and checks hook and
 memory operations before applying a patch. The affected quick-load, time-stop,
 and cheat targets have also been updated.
 
+The legacy Special K warning about an infinite XInput haptic-feedback loop is
+filtered when connecting a controller. Its recursion protection remains active;
+other warnings and the controller/rumble settings are preserved.
+
 For an existing UnX installation, close the game, back up `unx.dll`, and replace
 it with the Win32 DLL from this fork's release. Keep the legacy Special K
 `dxgi.dll` supplied with UnX. Cycle FFX speed with **Ctrl+Shift+H** or your

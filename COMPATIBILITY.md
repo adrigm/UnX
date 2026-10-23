@@ -31,6 +31,19 @@ the three-byte audio patch only when its state changes. The audio patch verifies
 the original bytes, retains suspended thread handles, checks instruction
 pointers, restores page permissions, and flushes the instruction cache.
 
+## Controller warning
+
+The legacy runtime queues an ImGui warning when it detects recursive XInput
+haptic feedback. UnX filters this exact message from Special K:
+
+> Problematic XInput software detected (infinite haptic feedback loop), please restart the Steam client.
+
+The filter locates the internal warning function through its unique read-only
+message, executable call sites that agree on the target, and a verified function
+prologue. Only the exact text from callers inside the injector is discarded;
+other warnings use the original queue. The existing haptic recursion guard,
+controller hooks, and rumble settings remain active.
+
 ## Validation
 
 Validation performed on 2026-10-23:
@@ -44,6 +57,8 @@ Validation performed on 2026-10-23:
   and the locally available earlier FFX/FFX-2 executables.
 - Interactive FFX gameplay testing confirmed repeated x1/x2/x4/x8/x1 cycles
   without a crash. Logs confirmed successful hook and audio-patch transitions.
+- Selective warning-filter checks cover the exact message, other warnings,
+  partial and extended messages, null text, and callers outside Special K.
 
 FFX-2 gameplay and every individual cheat have not been exhaustively tested.
 These checks establish compatibility with the examined executables; later game

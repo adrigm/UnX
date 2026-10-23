@@ -32,6 +32,8 @@
 #include "input.h"
 #include "window.h"
 
+extern void UNX_InitInputCompatibility (HMODULE injector);
+
 
 HMODULE      hDLLMod      = { nullptr }; // Handle to SELF
 HMODULE      hInjectorDLL = { nullptr }; // Handle to Special K
@@ -106,6 +108,8 @@ DeferredDllMain (       HMODULE  hModSpecialK,
   // Plugin State
   if (UNX_Init_MinHook () == MH_OK)
   {
+    UNX_InitInputCompatibility (hInjectorDLL);
+
     UNX_CreateDLLHook2 ( config.system.injector.c_str (),
                          "SK_PlugIn_ControlPanelWidget",
                                 UNX_ControlPanelWidget,

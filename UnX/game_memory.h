@@ -63,10 +63,10 @@ struct ExecutableImage {
 };
 
 inline bool
-GetExecutableImage (ExecutableImage& image)
+GetImage (HMODULE module, ExecutableImage& image)
 {
   image = { };
-  uint8_t* base = reinterpret_cast <uint8_t*> (GetModuleHandle (nullptr));
+  uint8_t* base = reinterpret_cast <uint8_t*> (module);
   if (! IsReadable (base, sizeof (IMAGE_DOS_HEADER)))
     return false;
   IMAGE_DOS_HEADER* dos = reinterpret_cast <IMAGE_DOS_HEADER*> (base);
@@ -99,6 +99,12 @@ GetExecutableImage (ExecutableImage& image)
   image.sections = sections;
   image.size     = headers->OptionalHeader.SizeOfImage;
   return true;
+}
+
+inline bool
+GetExecutableImage (ExecutableImage& image)
+{
+  return GetImage (GetModuleHandle (nullptr), image);
 }
 
 inline bool
