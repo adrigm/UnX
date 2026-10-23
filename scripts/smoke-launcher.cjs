@@ -22,8 +22,9 @@ async function main() {
     args.push(path.join(root, 'launcher'));
   }
   args.push('--smoke-test');
-  // Only the isolated hosted Linux smoke test needs this flag. Released apps
-  // keep Electron's renderer sandbox enabled during normal operation.
+  // Request this flag explicitly for the hosted Linux smoke test. The default
+  // electron-builder 26 AppImage wrapper also supplies it on normal launches;
+  // this check does not validate sandboxed Linux execution.
   if (process.platform === 'linux' && process.env.CI) args.push('--no-sandbox');
   const report = path.join(output, `smoke-${process.platform}-${Date.now()}.json`);
   const status = await new Promise((resolve, reject) => {

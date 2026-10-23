@@ -90,17 +90,48 @@ is added. No automatic updater or release publication is configured.
 `Build UnX Manager` runs on relevant source pushes to `fix/**` and `feature/**`
 branches. It can also be dispatched manually after the workflow is available
 on the repository's default branch. It first builds the Win32 DLL from the
-selected checkout on Windows,
-using the pinned official Special K binary only to generate its import
-library. Native checks run before the DLL is uploaded as a workflow artifact.
+selected checkout on Windows, using the pinned official Special K binary
+only to generate its import library. Native checks run before the DLL is
+uploaded as a workflow artifact.
 
 The Windows/Linux packaging matrix downloads that same compiled DLL, runs the
 launcher tests, prepares the verified offline payload, and builds the native
 portable target on its respective host. Each package gets a SHA256 sidecar
 and the generated payload manifest. Linux output is checked for ELF and the
 AppImage type-2 signature; Windows output is checked for the PE executable
-signature. These format checks supplement the build and unit tests; manual
-gameplay and desktop-launch checks remain separate.
+signature.
+
+The matrix also starts the packaged applications, using
+`node scripts/smoke-launcher.cjs --packaged` on Windows and
+`xvfb-run -a node scripts/smoke-launcher.cjs --packaged` on Linux. These checks
+execute the portable `.exe` or `.AppImage`, open its Electron window, and wait
+for the renderer to report readiness. The process must exit successfully,
+identify itself as packaged, find the bundled payload manifest, and render
+the settings and categories expected by the shared schema. Reports are
+written to `artifacts/launcher/smoke-<platform>-<timestamp>.json`. The test uses
+an isolated temporary application profile and does not install into a real
+game folder.
+
+For local Windows verification after building, run:
+
+```powershell
+node scripts/smoke-launcher.cjs --packaged
+```
+
+For a Linux build host with Xvfb available, run:
+
+```sh
+xvfb-run -a node scripts/smoke-launcher.cjs --packaged
+```
+
+The Linux smoke test uses `APPIMAGE_EXTRACT_AND_RUN=1` to avoid requiring FUSE
+on the build runner and requests `--no-sandbox` in CI. The current
+electron-builder 26 default AppImage wrapper also adds `--no-sandbox` during
+normal launches. These checks cover packaged application and renderer startup;
+they do not validate FUSE mounting, sandboxed Linux execution, or an interactive
+installation. Backend transaction tests use temporary synthetic game folders.
+Actual Final Fantasy X/X-2 gameplay through Steam Proton has not been tested;
+the AppImage build and Xvfb test do not establish Proton game compatibility.
 
 The workflow uses read-only repository permissions, disables package-manager
 cache uploads, and specifies `--publish never`. It writes only runner-local
