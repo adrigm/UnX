@@ -649,9 +649,40 @@ SetKillBranch (bool bypass)
     return false;
   *branch = replacement;
   const bool flushed = FlushInstructionCache (GetCurrentProcess (), branch, 1) != FALSE;
+  const DWORD flush_error = flushed ? ERROR_SUCCESS : GetLastError ();
   DWORD discarded = 0;
   const bool restored = VirtualProtect (branch, 1, protection, &discarded) != FALSE;
-  return flushed && restored;
+  const DWORD protection_error = restored ? ERROR_SUCCESS : GetLastError ();
+  if (flushed && restored)
+    return true;
+
+  if (bypass)
+  {
+    // The caller only schedules the delayed restore after successful activation.
+    // Undo a partially applied activation here so a cleanup error cannot leave
+    // the unconditional branch enabled indefinitely.
+    DWORD rollback_protection = 0;
+    bool rollback = VirtualProtect (branch, 1, PAGE_EXECUTE_READWRITE,
+                                    &rollback_protection) != FALSE;
+    DWORD rollback_error = rollback ? ERROR_SUCCESS : GetLastError ();
+    if (rollback)
+    {
+      *branch = expected;
+      rollback = FlushInstructionCache (GetCurrentProcess (), branch, 1) != FALSE;
+      if (! rollback)
+        rollback_error = GetLastError ();
+      if (! VirtualProtect (branch, 1, protection, &discarded))
+      {
+        rollback_error = GetLastError ();
+        rollback = false;
+      }
+    }
+    dll_log->Log (L"[Cheat Code] Kill bypass activation failed (flush=%lu, protection=%lu); "
+                  L"rollback %s (error=%lu)", flush_error, protection_error,
+                  rollback ? L"completed" : L"FAILED", rollback_error);
+  }
+  // A failed deactivation must keep the restored conditional branch (0x7e).
+  return false;
 }
 
 void
