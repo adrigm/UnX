@@ -17,7 +17,7 @@ $devShell = Join-Path $vsPath 'Common7\Tools\Launch-VsDevShell.ps1'
 
 $outputDirectory = Join-Path $repoRoot 'artifacts\tests'
 New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
-foreach ($name in @('signature_scan_test', 'game_memory_test', 'warning_filter_test')) {
+foreach ($name in @('signature_scan_test', 'game_memory_test', 'warning_filter_test', 'language_preferences_test')) {
     $source = Join-Path $repoRoot "tests\$name.cpp"
     $executable = Join-Path $outputDirectory "$name.exe"
     $object = Join-Path $outputDirectory "$name.obj"

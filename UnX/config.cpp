@@ -27,6 +27,7 @@
 #include "ini.h"
 #include "log.h"
 #include "language.h"
+#include "language_preferences.h"
 #include "cheat.h"
 #include "input.h"
 
@@ -141,6 +142,14 @@ struct {
   unx::ParameterStringW* sfx;
   unx::ParameterStringW* video;
   unx::ParameterStringW* timing;
+
+  unx::ParameterStringW* voice_override;
+  unx::ParameterStringW* sfx_override;
+  unx::ParameterStringW* video_override;
+
+  unx::language_preference voice_preference;
+  unx::language_preference sfx_preference;
+  unx::language_preference video_preference;
 } language;
 
 struct {
@@ -588,67 +597,63 @@ UNX_LoadConfig (std::wstring name)
   //
   display.disable_dpi_scaling->load (config.display.disable_dpi_scaling);
 
-  if (! language.voice->load (config.language.voice))
-    language.voice->set_value (config.language.voice);
+  language.voice_preference = unx::language_preference ();
+  language.sfx_preference   = unx::language_preference ();
+  language.video_preference = unx::language_preference ();
 
-  unx::ParameterStringW* voice_override =
+  if (! language.voice->load (language.voice_preference.master))
+    language.voice->set_value (language.voice_preference.master);
+
+  language.voice_override =
     (unx::ParameterStringW *)
       g_ParameterFactory.create_parameter <std::wstring> (
         L"App-Specific Voice Language Preference");
 
-  voice_override->register_to_ini (
+  language.voice_override->register_to_ini (
       language_ini,
         UNX_GetExecutableName (),
           L"Voice" );
 
-  std::wstring tmp_str;
-
-  if (voice_override->load (tmp_str)) {
-    if (tmp_str.length ())   config.language.voice = tmp_str;
-  } else {
-    voice_override->store (L"");
-  }
+  if (! language.voice_override->load (language.voice_preference.game_override))
+    language.voice_override->store (L"");
+  config.language.voice = language.voice_preference.effective ();
 
 
-  if (! language.sfx->load (config.language.sfx))
-    language.sfx->set_value (config.language.sfx);
+  if (! language.sfx->load (language.sfx_preference.master))
+    language.sfx->set_value (language.sfx_preference.master);
 
 
-  unx::ParameterStringW* sfx_override =
+  language.sfx_override =
     (unx::ParameterStringW *)
       g_ParameterFactory.create_parameter <std::wstring> (
         L"App-Specific SFX Language Preference");
 
-  sfx_override->register_to_ini (
+  language.sfx_override->register_to_ini (
       language_ini,
         UNX_GetExecutableName (),
           L"SoundEffects" );
 
-  if (sfx_override->load (tmp_str)) {
-    if (tmp_str.length ())   config.language.sfx = tmp_str;
-  } else {
-    sfx_override->store (L"");
-  }
+  if (! language.sfx_override->load (language.sfx_preference.game_override))
+    language.sfx_override->store (L"");
+  config.language.sfx = language.sfx_preference.effective ();
 
 
-  if (! language.video->load (config.language.video))
-    language.video->set_value (config.language.video);
+  if (! language.video->load (language.video_preference.master))
+    language.video->set_value (language.video_preference.master);
 
-  unx::ParameterStringW* fmv_override =
+  language.video_override =
     (unx::ParameterStringW *)
       g_ParameterFactory.create_parameter <std::wstring> (
         L"App-Specific FMV Language Preference");
 
-  fmv_override->register_to_ini (
+  language.video_override->register_to_ini (
       language_ini,
         UNX_GetExecutableName (),
           L"Video" );
 
-  if (fmv_override->load (tmp_str)) {
-    if (tmp_str.length ())   config.language.video = tmp_str;
-  } else {
-    fmv_override->store (L"");
-  }
+  if (! language.video_override->load (language.video_preference.game_override))
+    language.video_override->store (L"");
+  config.language.video = language.video_preference.effective ();
 
   input.remap_dinput8->load (config.input.remap_dinput8);
   input.gamepad_slot->load  (config.input.gamepad_slot);
@@ -754,14 +759,9 @@ UNX_SaveConfig (std::wstring name, bool close_config)
 
 
 
-  ((unx::iParameter *)language.sfx)->set_value_str (config.language.sfx);
-  ((unx::iParameter *)language.sfx)->store         (                   );
-
-  ((unx::iParameter *)language.voice)->set_value_str (config.language.voice);
-  ((unx::iParameter *)language.voice)->store         (                     );
-
-  ((unx::iParameter *)language.video)->set_value_str (config.language.video);
-  ((unx::iParameter *)language.video)->store         (                     );
+  language.sfx_preference.save_to   (*language.sfx,   *language.sfx_override);
+  language.voice_preference.save_to (*language.voice, *language.voice_override);
+  language.video_preference.save_to (*language.video, *language.video_override);
 
   extern wchar_t* UNX_GetExecutableName (void);
   if (StrStrIW (UNX_GetExecutableName (), L"ffx.exe"))
@@ -971,19 +971,16 @@ UNX_ControlPanelWidget (void)
     ImGui::PushStyleColor (ImGuiCol_HeaderActive,  ImVec4 (0.87f, 0.53f, 0.53f, 0.80f));
     ImGui::TreePush       ("");
 
-    if (ImGui::CollapsingHeader ("Language", ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::CollapsingHeader ("Language (This Game)", ImGuiTreeNodeFlags_DefaultOpen))
     {
       ImGui::TreePush ("");
 
-      const char* szLanguageOptions = "Game Default\0English\0Japanese\0\0";
+      ImGui::Text ("Changes apply to this game only. Shared defaults are set in the launcher.");
+      const char* szLanguageOptions = "Inherit Master\0Game Language\0English\0Japanese\0\0";
 
-      int voice_lang = (config.language.voice == L"us" ? 1 : config.language.voice == L"jp" ? 2 : 0);
-      int sfx_lang   = (config.language.sfx   == L"us" ? 1 : config.language.sfx   == L"jp" ? 2 : 0);
-      int fmv_lang   = (config.language.video == L"us" ? 1 : config.language.video == L"jp" ? 2 : 0);
-
-      int orig_voice = voice_lang;
-      int orig_sfx   = sfx_lang;
-      int orig_fmv   = fmv_lang;
+      int voice_lang = language.voice_preference.game_selection ();
+      int sfx_lang   = language.sfx_preference.game_selection ();
+      int fmv_lang   = language.video_preference.game_selection ();
 
       ImGui::PushItemWidth (ImGui::GetWindowWidth () * 0.7f);
 
@@ -993,43 +990,28 @@ UNX_ControlPanelWidget (void)
       if ( ImGui::Combo ( "Dialogue", &voice_lang,
                           szLanguageOptions ) )
       {
-             if (voice_lang == 1) config.language.voice = L"us";
-        else if (voice_lang == 2) config.language.voice = L"jp";
-        else                      config.language.voice = L"default";
-      
-        if (voice_lang != orig_voice)
-        {
-          changed_now = true;
-          unx::LanguageManager::ApplyPatch (Voice);
-        }
+        language.voice_preference.select_for_game (voice_lang);
+        config.language.voice = language.voice_preference.effective ();
+        changed_now = true;
+        unx::LanguageManager::ApplyPatch (Voice);
       }
 
       if ( ImGui::Combo ( "Sound Effects", &sfx_lang,
                           szLanguageOptions ) )
       {
-             if (sfx_lang == 1) config.language.sfx = L"us";
-        else if (sfx_lang == 2) config.language.sfx = L"jp";
-        else                    config.language.sfx = L"default";
-
-        if (sfx_lang != orig_sfx)
-        {
-          changed_now = true;
-          unx::LanguageManager::ApplyPatch (SoundEffect);
-        }
+        language.sfx_preference.select_for_game (sfx_lang);
+        config.language.sfx = language.sfx_preference.effective ();
+        changed_now = true;
+        unx::LanguageManager::ApplyPatch (SoundEffect);
       }
 
       if ( ImGui::Combo ( "Full Motion Video", &fmv_lang,
                           szLanguageOptions ) )
       {
-             if (fmv_lang == 1) config.language.video = L"us";
-        else if (fmv_lang == 2) config.language.video = L"jp";
-        else                    config.language.video = L"default";
-      
-        if (fmv_lang != orig_fmv)
-        {
-          changed_now = true;
-          unx::LanguageManager::ApplyPatch (Video);
-        }
+        language.video_preference.select_for_game (fmv_lang);
+        config.language.video = language.video_preference.effective ();
+        changed_now = true;
+        unx::LanguageManager::ApplyPatch (Video);
       }
 
       ImGui::PopItemWidth (  );
