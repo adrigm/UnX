@@ -84,7 +84,8 @@ the Linux target is a real x64 `.AppImage`, built on Linux. See the official
 [electron-builder target documentation](https://www.electron.build/docs/)
 and [AppImage documentation](https://www.electron.build/v26/docs/appimage/).
 Packages are unsigned unless a separate, explicitly authorized signing step
-is added. No automatic updater or release publication is configured.
+is added. No automatic package updater is configured. Releases use the reviewed
+publication workflow described below.
 
 ## GitHub Actions
 
@@ -135,8 +136,10 @@ Separate testing on SteamOS reproduced the startup crash with the legacy
 cache enabled and confirmed working startup with the cache off and injection
 on. That test used the preceding DLL with a local configuration workaround.
 The packaged smoke tests still do not establish game compatibility. The exact
-0.10.0 DLL and a complete gameplay matrix require their own validation; see
-[release notes](../../docs/RELEASE-0.10.0.md).
+0.10.0 release DLL was subsequently installed and launched through Steam Proton
+11; the user confirmed visible, working startup, as recorded in
+[PR #1](https://github.com/adrigm/UnX/pull/1). A complete gameplay matrix remains
+pending; see [release notes](../../docs/RELEASE-0.10.0.md).
 
 The workflow uses read-only repository permissions, disables package-manager
 cache uploads, and specifies `--publish never`. It writes only runner-local
@@ -160,12 +163,19 @@ successful build-run ID, hashes of the seven assets, and
 sidecar, Linux AppImage and sidecar, `UnX-0.10.0.zip` and sidecar, and
 `payload-manifest.json`.
 
-Only the request file may differ between the tested source commit and the
-publishing commit. Before writing to the release API, the publisher verifies
+Only the release request, `scripts/publish-release.py` and its dedicated
+`tests/publish_release_test.py` may differ between the tested source commit and
+the publishing commit. This permits a publication-tool correction while keeping
+the tested product bytes unchanged. Product or workflow changes require a new
+verified build. Before writing to the release API, the publisher verifies
 that all workflow files at the tested source commit match the repository's
 current default branch. Merge the reviewed source PR normally before sending
 the request; do not squash away the tested source commit. The exact-release
 SteamOS startup retest must be approved and recorded in the reviewed PR first.
+
+Actions artifact API requests use the GitHub JSON media type to obtain a signed
+redirect. Release-asset API downloads and redirected binary requests use
+`application/octet-stream`; redirects never receive the job token.
 
 The publisher downloads the three artifacts from the successful source build,
 checks the reviewed bytes and complete payload inventory, and confirms that

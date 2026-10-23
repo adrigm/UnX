@@ -110,7 +110,10 @@ def verify_checkout(request, environment):
     require(source != head, "The request must follow the tested source commit")
     git("merge-base", "--is-ancestor", source, head)
     changes = git("diff", "--name-only", source, head).decode().splitlines()
-    require(changes == [REQUEST_PATH], "Only docs/publish-release.json may differ from the tested source")
+    allowed_changes = {REQUEST_PATH, "scripts/publish-release.py", "tests/publish_release_test.py"}
+    require(REQUEST_PATH in changes and set(changes) <= allowed_changes,
+            "Only the release request and publisher script/tests may differ from the tested source; "
+            "product and workflow changes require a new verified build")
     committed_request = git("show", head + ":" + REQUEST_PATH)
     require(strict_json(committed_request) == request, "Request differs from committed bytes")
     package = strict_json(git("show", source + ":launcher/package.json"))
@@ -155,15 +158,18 @@ class GitHub:
         if data is not None:
             headers["Content-Type"] = content_type or "application/json"
         request = urllib.request.Request(url, data=data, headers=headers, method=method)
+        # API paths identify failures without exposing signed queries, download
+        # URLs or credentials. Redirected binary URLs are always redacted.
+        endpoint_label = parsed.path if authenticated else "[signed binary download]"
         try:
             return self.opener.open(request, timeout=120)
         except urllib.error.HTTPError as error:
             # Intentionally omit URLs and server bodies, which can contain signed links.
             if error.code in {301, 302, 303, 307, 308, 404}:
                 return error
-            raise ReleaseError(f"GitHub {method} request failed (HTTP {error.code})") from None
+            raise ReleaseError(f"GitHub {method} {endpoint_label} failed (HTTP {error.code})") from None
         except (urllib.error.URLError, TimeoutError):
-            raise ReleaseError(f"GitHub {method} request failed") from None
+            raise ReleaseError(f"GitHub {method} {endpoint_label} failed") from None
 
     def json(self, method, path, value=None, *, optional=False):
         data = None if value is None else json.dumps(value).encode("utf-8")
@@ -174,8 +180,15 @@ class GitHub:
             return strict_json(response.read(8 * 1024 * 1024))
 
     def download(self, api_path, destination):
-        response = self.open("GET", "https://api.github.com" + api_path,
-                             accept="application/octet-stream")
+        if re.fullmatch(r"/repos/" + REPOSITORY + r"/actions/artifacts/[1-9][0-9]*/zip", api_path):
+            # Actions artifact downloads negotiate the JSON API media type and
+            # return a 302 to the binary archive. octet-stream is rejected here.
+            accept = "application/vnd.github+json"
+        else:
+            require(re.fullmatch(r"/repos/" + REPOSITORY + r"/releases/assets/[1-9][0-9]*", api_path),
+                    "Unexpected artifact/asset API download endpoint")
+            accept = "application/octet-stream"
+        response = self.open("GET", "https://api.github.com" + api_path, accept=accept)
         try:
             for _ in range(6):
                 if response.status not in {301, 302, 303, 307, 308}:

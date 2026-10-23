@@ -185,6 +185,87 @@ class ReleaseTests(unittest.TestCase):
         self.assertEqual(keywords["content_type"], "application/octet-stream")
         self.assertNotIn("accept", keywords)  # open defaults to GitHub's JSON media type.
 
+    def test_checkout_allows_publisher_only_recovery_without_product_changes(self):
+        request = self.request_document()
+        head = "2" * 40
+        environment = {"GITHUB_ACTIONS": "true", "GITHUB_REPOSITORY": publisher.REPOSITORY,
+                       "GITHUB_REF": "refs/heads/" + publisher.BRANCH,
+                       "GITHUB_EVENT_NAME": "push", "GITHUB_SHA": head}
+        changes = [publisher.REQUEST_PATH, "scripts/publish-release.py", "tests/publish_release_test.py"]
+        def git_output(*arguments):
+            if arguments[0] == "rev-parse":
+                return head.encode()
+            if arguments[0] == "merge-base":
+                return b""
+            if arguments[0] == "diff":
+                return "\n".join(changes).encode()
+            if arguments == ("show", head + ":" + publisher.REQUEST_PATH):
+                return json.dumps(request).encode()
+            if arguments[0] == "show" and arguments[1].endswith(":launcher/package.json"):
+                return b'{"version":"1.0.1"}'
+            if arguments[0] == "show" and arguments[1].endswith(":launcher/payload-manifest.json"):
+                return b'{"version":"0.10.0"}'
+            if arguments[0] == "show" and arguments[1].endswith(":UnX/DLL_VERSION.H"):
+                return b"#define UNX_MAJOR 0\n#define UNX_MINOR 10\n#define UNX_BUILD 0\n#define UNX_REV 0\n"
+            if arguments[0] == "show" and arguments[1].endswith(":" + publisher.NOTES_PATH):
+                return self.notes.encode()
+            raise AssertionError(arguments)
+        with mock.patch.object(publisher, "git", side_effect=git_output):
+            self.assertEqual(publisher.verify_checkout(request, environment), self.notes)
+            changes.append("UnX/config.cpp")
+            with self.assertRaisesRegex(publisher.ReleaseError, "new verified build"):
+                publisher.verify_checkout(request, environment)
+            changes[:] = ["scripts/publish-release.py"]
+            with self.assertRaises(publisher.ReleaseError):
+                publisher.verify_checkout(request, environment)
+
+    def test_actual_artifact_headers_and_redirect_keep_token_on_api_only(self):
+        class Response(io.BytesIO):
+            def __init__(self, status, value=b"", location=None):
+                super().__init__(value)
+                self.status = status
+                self.headers = {} if location is None else {"Location": location}
+        github = publisher.GitHub("test-secret")
+        signed_url = "https://productionresults.blob.core.windows.net/archive?signature=private"
+        calls = []
+        def transport(request, timeout):
+            calls.append(request)
+            return (Response(302, location=signed_url) if len(calls) == 1
+                    else Response(200, b"artifact"))
+        with mock.patch.object(github.opener, "open", side_effect=transport):
+            github.download("/repos/adrigm/UnX/actions/artifacts/123/zip", self.root / "artifact")
+        self.assertEqual(calls[0].get_header("Accept"), "application/vnd.github+json")
+        self.assertEqual(calls[0].get_header("Authorization"), "Bearer test-secret")
+        self.assertEqual(calls[1].get_header("Accept"), "application/octet-stream")
+        self.assertIsNone(calls[1].get_header("Authorization"))
+        self.assertEqual((self.root / "artifact").read_bytes(), b"artifact")
+
+    def test_actual_release_asset_headers_request_binary(self):
+        class Response(io.BytesIO):
+            status = 200
+            headers = {}
+        github = publisher.GitHub("test-secret")
+        with mock.patch.object(github.opener, "open", return_value=Response(b"asset")) as transport:
+            github.download("/repos/adrigm/UnX/releases/assets/123", self.root / "asset")
+        self.assertEqual(transport.call_args.args[0].get_header("Accept"), "application/octet-stream")
+
+    def test_http_errors_identify_api_path_without_tokens_or_signed_urls(self):
+        github = publisher.GitHub("test-secret")
+        path = "/repos/adrigm/UnX/actions/artifacts/123/zip"
+        error = publisher.urllib.error.HTTPError("https://api.github.com" + path, 415, "error", {}, None)
+        with mock.patch.object(github.opener, "open", side_effect=error):
+            with self.assertRaisesRegex(publisher.ReleaseError, "artifacts/123/zip.*415") as caught:
+                github.download(path, self.root / "error")
+        self.assertNotIn("test-secret", str(caught.exception))
+        signed_url = "https://release-assets.githubusercontent.com/archive?signature=private"
+        error = publisher.urllib.error.HTTPError(signed_url, 415, "error", {}, None)
+        with mock.patch.object(github.opener, "open", side_effect=error):
+            with self.assertRaises(publisher.ReleaseError) as caught:
+                github.open("GET", signed_url, authenticated=False)
+        self.assertIn("[signed binary download]", str(caught.exception))
+        self.assertNotIn("private", str(caught.exception))
+        self.assertNotIn("githubusercontent", str(caught.exception))
+
     def test_download_redirect_never_forwards_auth(self):
         class Response(io.BytesIO):
             def __init__(self, status, value=b"", location=None):
@@ -198,7 +279,7 @@ class ReleaseTests(unittest.TestCase):
             return (Response(302, location="https://release-assets.githubusercontent.com/blob?signature=private")
                     if len(calls) == 1 else Response(200, b"asset"))
         github.open = opener
-        github.download("/asset", self.root / "download")
+        github.download("/repos/adrigm/UnX/releases/assets/123", self.root / "download")
         self.assertEqual(calls, [True, False])
         self.assertEqual((self.root / "download").read_bytes(), b"asset")
 
