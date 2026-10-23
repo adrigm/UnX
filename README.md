@@ -9,6 +9,11 @@ It includes backups, restoration, repair, per-game language settings, shortcut
 editing, and Steam launch controls. Portable `.exe` and `.AppImage` builds are
 generated as reviewable artifacts; release publication remains manual.
 
+For testing on an actual SteamOS device, use the self-contained
+[SteamOS handoff](docs/STEAMOS-HANDOFF.md) and
+[user-local setup script](scripts/steamos-test-setup.sh). They work without an
+existing GitHub CLI, Git or Node installation.
+
 ### Steam 2026 compatibility fork
 
 This fork fixes the FFX x2/x4/x8 speed-boost crash with Steam build `25501027`.
