@@ -13,7 +13,7 @@ if (-not (Test-Path -LiteralPath $vswhere)) {
 $vsPath = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
 if (-not $vsPath) { throw 'Visual Studio C++ x86/x64 tools were not found.' }
 $devShell = Join-Path $vsPath 'Common7\Tools\Launch-VsDevShell.ps1'
-& $devShell -Arch x86 -HostArch amd64 -SkipAutomaticLocation -NoLogo
+& $devShell -Arch x86 -HostArch amd64 -SkipAutomaticLocation
 
 $outputDirectory = Join-Path $repoRoot 'artifacts\tests'
 New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
