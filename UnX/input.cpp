@@ -582,7 +582,7 @@ unx::InputManager::Init (void)
     );
 
   auto LoadKeybind =
-    [&](SK_Keybind* binding, wchar_t* ini_name) ->
+    [&](SK_Keybind* binding, const wchar_t* ini_name) ->
       auto
       {
         unx::ParameterStringW* ret =
