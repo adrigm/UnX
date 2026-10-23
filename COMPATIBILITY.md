@@ -1,7 +1,31 @@
-# Steam 2026 compatibility
+# Steam 2026 and SteamOS compatibility
 
-Version: 0.9.2.1. Target: Windows Win32 UnX with the legacy Special K 0.8.60.2
-runtime, Steam app 359870, build 25501027.
+Version: **0.10.0**. The Win32 plugin uses the legacy Special K **0.8.60.2**
+runtime, Steam app **359870**, build **25501027**, on Windows or under Steam
+Proton. The accompanying manager is **1.0.1**.
+
+## SteamOS startup fix
+
+SteamOS testing reproduced an FFX startup crash with the legacy texture cache
+enabled. The same installation started successfully with `Cache=false` and
+`Inject=true`, including after repair and reinstallation. The user confirmed
+that the successful sessions ended by manual closure. This establishes the
+working configuration for that environment; it does not prove the underlying
+texture-resource lifetime failure has been fixed inside Special K.
+
+UnX 0.10.0 detects Wine/Proton at runtime through `wine_get_version` in
+`ntdll.dll` and forces only the legacy texture cache off before passing its
+value to Special K. It also persists `UnX.Textures/Cache=false` under Wine.
+Texture injection and the other texture options retain their requested values.
+Native Windows continues to use its configured cache value. Manager 1.0.1
+applies the matching Linux compatibility setting when writing configuration.
+
+The plugin no longer starts the legacy Special K upstream updater. The manager
+also disables its automatic update frequency, preventing an offer to replace
+this fork with an older upstream distribution. The bundled `dxgi.dll` remains
+the pinned legacy runtime; no replacement runtime is downloaded.
+
+See [release notes and the validation matrix](docs/RELEASE-0.10.0.md).
 
 ## Speed crash
 
@@ -44,9 +68,11 @@ prologue. Only the exact text from callers inside the injector is discarded;
 other warnings use the original queue. The existing haptic recursion guard,
 controller hooks, and rumble settings remain active.
 
-## Validation
+## Earlier Windows validation
 
-Validation performed on 2026-10-23:
+The following validation was performed on 2026-10-23 for the preceding
+0.9.2.1 build. These results explain the retained compatibility work; they are
+not a claim of interactive Windows gameplay testing of the new 0.10.0 DLL:
 
 - Release Win32 compilation with MSVC 14.51, toolset v145, and Windows SDK 10.
 - Imported Special K/ImGui symbols checked against the installed legacy runtime.

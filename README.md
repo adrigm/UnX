@@ -1,18 +1,22 @@
 # ***"Untitled" Project X***
 Technical Fixes and Enhancements for ***Final Fantasy X | X-2 HD Remaster***
 
-### UnX Manager for Windows and Linux
+### UnX 0.10.0 and Manager 1.0.1 for Windows and Linux
 
 The new [UnX Manager](launcher/README.md) installs the complete mod runtime,
 detects Steam libraries, and exposes 125 English-language configuration options.
 It includes backups, restoration, repair, per-game language settings, shortcut
 editing, and Steam launch controls. Portable `.exe` and `.AppImage` builds are
-generated as reviewable artifacts; release publication remains manual.
+available from the [GitHub release](https://github.com/adrigm/UnX/releases/tag/v0.10.0).
+UnX 0.10.0 disables the legacy texture cache under Wine/Proton to avoid the
+SteamOS startup crash; texture injection stays available and native Windows
+cache behavior is preserved. The obsolete Special K updater is disabled.
+See [release notes and validation limits](docs/RELEASE-0.10.0.md).
 
-For testing on an actual SteamOS device, use the self-contained
-[SteamOS handoff](docs/STEAMOS-HANDOFF.md) and
-[user-local setup script](scripts/steamos-test-setup.sh). They work without an
-existing GitHub CLI, Git or Node installation.
+The self-contained [SteamOS handoff](docs/STEAMOS-HANDOFF.md) and
+[user-local setup script](scripts/steamos-test-setup.sh) describe the historical
+Manager 1.0.0 baseline used to investigate the issue. Their pinned binaries and
+checksums intentionally remain unchanged; use the new release for the fix.
 
 ### Steam 2026 compatibility fork
 

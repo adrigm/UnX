@@ -10,6 +10,8 @@ const { loadPayload } = require('./payload.cjs');
 const { ServiceError, contained, relativePath, readOptional, sha256, atomicWrite, exists } = require('./paths.cjs');
 
 const STATE_PATH = '.unx-manager/state.json';
+const UPDATER_PREFERENCES = 'Version/installed.ini';
+const UPDATER_REPOSITORY = 'Version/repository.ini';
 const IMPORT = { Architecture: 'Win32', Filename: 'unx.dll', Role: 'PlugIn', When: 'PlugIn' };
 const PROTON_APPS = ['FFX.exe', 'FFX-2.exe', 'FFX&X-2_Will.exe'];
 const RUNTIMES = ['D3DCompiler_43.dll', 'd3dx9_43.dll', 'MSVCP140.dll', 'CONCRT140.dll', 'VCOMP140.dll', 'VCRUNTIME140.dll'];
@@ -27,6 +29,16 @@ function platform() { return testHooks.platform || process.platform; }
 function schema() { return require('../../shared/settings-schema.json'); }
 function warning(code, message) { return { code, message }; }
 function identity(file) { return `${file.scope}:${file.path.toLowerCase()}`; }
+function protonCacheRestricted() { return platform() === 'linux'; }
+function cacheDisabled(value) { return /^(false|0|no|off)$/i.test(value || ''); }
+function protonCacheWarning(documents) {
+  if (!protonCacheRestricted()) return null;
+  const unx = documents.get('UnX.ini')?.parsed;
+  const dxgi = documents.get('dxgi.ini')?.parsed;
+  if (unx && dxgi && cacheDisabled(ini.get(unx, 'UnX.Textures', 'Cache')) &&
+      cacheDisabled(ini.get(dxgi, 'Textures.D3D11', 'Cache'))) return null;
+  return warning('PROTON_TEXTURE_CACHE_ENABLED', 'The legacy texture cache is unavailable under Proton because it can crash at startup. Apply settings or install UnX to disable it in both configuration files; texture injection is preserved.');
+}
 
 async function readState(root) {
   const data = await readOptional(await contained(root, STATE_PATH));
@@ -110,7 +122,10 @@ async function readSettings(root) {
 
 async function loadSettings(gameDirectory) {
   const { info } = await context(gameDirectory, false, false);
-  const { values, warnings } = await readSettings(info.path);
+  const { values, warnings, documents } = await readSettings(info.path);
+  const cacheWarning = protonCacheWarning(documents);
+  if (cacheWarning) warnings.push(cacheWarning);
+  if (protonCacheRestricted()) values['textures.cache'] = false;
   return { values, warnings };
 }
 
@@ -157,13 +172,21 @@ async function settingsChanges(root, values = {}, payload = null) {
     if (Object.is(value, loaded.values[id]) && loaded.validValues[id] && loaded.documents.get(setting.file).bytes !== null) continue;
     const serialized = validateValue(setting, value);
     if (!byFile.has(setting.file)) byFile.set(setting.file, []);
-    byFile.get(setting.file).push({ section: setting.section, key: setting.key, value: serialized });
+    byFile.get(setting.file).push({ section: setting.section, key: setting.key,
+      value: protonCacheRestricted() && id === 'textures.cache' ? 'false' : serialized });
   }
   if (payload) for (const setting of settings.values()) {
     if (!loaded.documents.get(setting.file).bytes && !byFile.has(setting.file)) byFile.set(setting.file, []);
   }
   if (!byFile.has('dxgi.ini')) byFile.set('dxgi.ini', []);
   byFile.get('dxgi.ini').push(...Object.entries(IMPORT).map(([key, value]) => ({ section: 'Import.UnX', key, value })));
+  if (protonCacheRestricted()) {
+    if (!byFile.has('UnX.ini')) byFile.set('UnX.ini', []);
+    byFile.get('UnX.ini').push({ section: 'UnX.Textures', key: 'Cache', value: 'false' });
+    byFile.get('dxgi.ini').push({ section: 'Textures.D3D11', key: 'Cache', value: 'false' });
+    const cacheWarning = protonCacheWarning(loaded.documents);
+    if (cacheWarning) loaded.warnings.push(cacheWarning);
+  }
   const changes = [];
   for (const [file, edits] of byFile) {
     let before = loaded.documents.get(file)?.bytes;
@@ -179,6 +202,22 @@ async function settingsChanges(root, values = {}, payload = null) {
     changes.push({ scope: 'game', path: file, data: ini.edit(before, edits) });
   }
   return { changes, warnings: loaded.warnings };
+}
+
+async function updaterChanges(root) {
+  const installed = await readOptional(await contained(root, UPDATER_PREFERENCES));
+  const edits = [{ section: 'Update.User', key: 'Frequency', value: 'never' }];
+  if (installed === null) edits.unshift({ section: 'Version.Local', key: 'Branch', value: 'Latest' });
+  const changes = [{ scope: 'game', path: UPDATER_PREFERENCES,
+    data: ini.edit(ini.remove(installed, [{ section: 'Update.User', key: 'Reminder' }]), edits) }];
+  // Special K 0.8.60.2 checks this file's mtime before honoring Frequency=never.
+  // A comment-only file prevents its missing-catalog first fetch without making
+  // up a package version or replacing an existing upstream catalog.
+  if (await readOptional(await contained(root, UPDATER_REPOSITORY)) === null) {
+    changes.push({ scope: 'game', path: UPDATER_REPOSITORY,
+      data: Buffer.from('; Legacy automatic updates disabled by UnX Manager. Use the fork releases.\n') });
+  }
+  return changes;
 }
 
 function protonSection(executable) { return String.raw`Software\\Wine\\AppDefaults\\${executable}\\DllOverrides`; }
@@ -297,10 +336,17 @@ async function inspectInstallation(gameDirectory) {
     else if (!proton.configured) warnings.push(warning('PROTON_OVERRIDE_MISSING', 'Install or update UnX to enable dxgi for this game inside its existing Proton prefix.'));
     warnings.push(warning('PROTON_NOT_RUNTIME_TESTED', 'Linux/Proton support has not been verified by an interactive gameplay test on this machine.'));
   }
+  if (protonCacheRestricted()) {
+    const unxIni = await readOptional(await contained(info.path, 'UnX.ini'));
+    const cacheWarning = protonCacheWarning(new Map([
+      ['UnX.ini', { parsed: ini.parse(unxIni) }], ['dxgi.ini', { parsed: ini.parse(dxgiIni) }]
+    ]));
+    if (cacheWarning) warnings.push(cacheWarning);
+  }
   warnings.push(...await prerequisiteWarnings(info, roots));
   const backups = await transaction.listBackups(info.path);
   if (backups.some(backup => ['prepared', 'rollback-failed'].includes(backup.status))) warnings.push(warning('UNFINISHED_TRANSACTION', 'An interrupted operation has a saved backup. Restore that backup before playing.'));
-  const blockers = warnings.filter(item => ['PAYLOAD_MISSING', 'PAYLOAD_INTEGRITY', 'PROTON_PREFIX_MISSING', 'PROTON_OVERRIDE_MISSING', 'RUNTIME_DEPENDENCIES', 'UNFINISHED_TRANSACTION', 'STATE_DAMAGED'].includes(item.code));
+  const blockers = warnings.filter(item => ['PAYLOAD_MISSING', 'PAYLOAD_INTEGRITY', 'PROTON_PREFIX_MISSING', 'PROTON_OVERRIDE_MISSING', 'PROTON_TEXTURE_CACHE_ENABLED', 'RUNTIME_DEPENDENCIES', 'UNFINISHED_TRANSACTION', 'STATE_DAMAGED'].includes(item.code));
   return { ...info, installation: info, installed: Boolean(plugin && dxgi), managed: Boolean(state),
     version: state?.version || null, availableVersion: payload?.manifest.version || null,
     upToDate: Boolean(current && !integrity.missing.length && !integrity.criticalModified.length),
@@ -333,6 +379,7 @@ async function installOrUpdate(gameDirectory, values = {}, options = {}) {
   const activeConfigNames = new Set(settings.changes.map(file => file.path.toLowerCase()));
   for (let index = changes.length - 1; index >= 0; index--) if (activeConfigNames.has(changes[index].path.toLowerCase())) changes.splice(index, 1);
   changes.push(...settings.changes);
+  changes.push(...await updaterChanges(info.path));
   const warnings = [...settings.warnings];
   if (platform() !== 'win32') {
     if (roots.proton && options.configureProton !== false) {

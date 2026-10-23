@@ -31,17 +31,24 @@ Special K coverage concentrates on windowing, presentation, frame pacing, cursor
 
 Each setting has a stable `id`, `category`, English `label` and `description`, a `type` (`boolean`, `number`, `select`, or `text`), a typed `default`, and an exact `file` / `section` / `key` destination. Select options use `{ "value": ..., "label": ... }`; values may be numbers or strings. Serialize booleans as `true` or `false`, numeric choices as their numeric INI values, and text as a single line. Do not translate INI keys or key tokens.
 
-Existing values take precedence over defaults. Apply defaults only to missing settings or after an explicit reset. Preserve unknown keys, comments, casing, encodings, and existing custom values. All entries use `restartRequired: true`: the launcher edits files for the next game start. A live game may overwrite its INIs on exit.
+Existing values take precedence over defaults, except for the Linux texture-cache compatibility policy described below. Apply defaults only to missing settings or after an explicit reset. Preserve unknown keys, comments, casing, encodings, and existing custom values. All entries use `restartRequired: true`: the launcher edits files for the next game start. A live game may overwrite its INIs on exit.
 
 Defaults match the distributed configuration and current runtime behavior where practical. These deliberate differences from zero-INI compiled defaults are relevant:
 
 | Setting | Launcher default | Compiled fallback or legacy behavior |
 | --- | --- | --- |
 | Master asset languages | `en` (use game language) | `jp`; only `us` and `jp` actually patch assets |
-| Texture cache | `true` | `false` in `config.h`; distributed defaults enable it |
+| Texture cache | Windows: `true`; Linux: forced `false` | `false` in `config.h`; original distributed defaults enable it. UnX 0.10.0 also forces it off at runtime under Wine/Proton |
 | Bypass Intel | `false` | `true` in `config.h`; distributed defaults explicitly recommend disabling this old override |
 | Party AP | `false` | The local user's `true` is a preference, not the product default |
 | Controller F2 combination | `Select+Circle` | The loader has a copy/paste bug assigning the fallback string to `gamepad.f1` when F2 is missing; explicitly writing every combination avoids that missing-key path |
+
+On Linux, the manager writes `Cache=false` for both `UnX.Textures` and the
+legacy `Textures.D3D11` cache entry. The plugin enforces the same policy under
+Wine/Proton and persists the UnX setting as false. This avoids the reproduced
+SteamOS startup crash while preserving the requested texture-injection value.
+Windows retains its configured cache value. The Special K upstream updater is
+disabled as an installation invariant rather than exposed as a preference.
 
 The catalog does not increase the active speed when the game starts. FFX still starts at 1x; the maximum and step configure subsequent shortcut presses. FFX-2 and Eternal Calm do not implement the custom FFX speed hook, party AP, Sensor, or Seymour options.
 
@@ -184,7 +191,7 @@ The JSON is authoritative. This table provides a compact audit trail of every pe
 | `advanced.bypassIntel` * | `UnX.ini` | `UnX.Render / BypassIntel` | `false` |
 | `textures.resourceRoot` | `UnX.ini` | `UnX.Textures / ResourceRoot` | `"UnX_Res"` |
 | `textures.inject` | `UnX.ini` | `UnX.Textures / Inject` | `true` |
-| `textures.cache` | `UnX.ini` | `UnX.Textures / Cache` | `true` |
+| `textures.cache` | `UnX.ini` | `UnX.Textures / Cache` | Windows: `true`; Linux: `false` (forced) |
 | `textures.dump` * | `UnX.ini` | `UnX.Textures / Dump` | `false` |
 | `sk.window.borderless` | `dxgi.ini` | `Window.System / Borderless` | `false` |
 | `sk.window.fillScreen` | `dxgi.ini` | `Window.System / Fullscreen` | `false` |

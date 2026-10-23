@@ -129,6 +129,11 @@ jobs:
             $hash = (Get-FileHash -LiteralPath $package.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             [System.IO.File]::WriteAllText(($package.FullName + '.sha256'), ($hash + '  ' + $package.Name + "`n"), [System.Text.Encoding]::ASCII)
           }
+          $modVersion = (Get-Content -LiteralPath 'launcher/payload/manifest.json' -Raw | ConvertFrom-Json).version
+          $modArchive = Join-Path $outputDirectory "UnX-$modVersion.zip"
+          Copy-Item -LiteralPath 'launcher/payload/payload.zip' -Destination $modArchive
+          $modHash = (Get-FileHash -LiteralPath $modArchive -Algorithm SHA256).Hash.ToLowerInvariant()
+          [System.IO.File]::WriteAllText(($modArchive + '.sha256'), ($modHash + '  ' + [System.IO.Path]::GetFileName($modArchive) + "`n"), [System.Text.Encoding]::ASCII)
           Copy-Item -LiteralPath 'launcher/payload/manifest.json' -Destination (Join-Path $outputDirectory 'payload-manifest.json')
       - name: Store reviewable packages without publishing a release
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -137,6 +142,7 @@ jobs:
           path: |
             artifacts/launcher/*.exe
             artifacts/launcher/*.AppImage
+            artifacts/launcher/UnX-*.zip
             artifacts/launcher/*.sha256
             artifacts/launcher/payload-manifest.json
           if-no-files-found: error

@@ -38,11 +38,6 @@
 using  SK_GetGameWindow_pfn = HWND (WINAPI *)(void);
 extern SK_GetGameWindow_pfn SK_GetGameWindow;
 
-using SK_UpdateSoftware_pfn   = HRESULT (__stdcall *)(const wchar_t* wszProduct);
-using SK_FetchVersionInfo_pfn = bool    (__stdcall *)(const wchar_t* wszProduct);
-
-
-
 bool
 UNX_IsRenderThread (void)
 {
@@ -339,33 +334,8 @@ SK_BeginBufferSwap_Detour (void)
   }
 
 
-  static volatile ULONG              __init = FALSE;
-  if (! InterlockedCompareExchange (&__init, 1, 0))
-  {
-    extern HMODULE hInjectorDLL;
-
-    SK_UpdateSoftware_pfn SK_UpdateSoftware =
-      (SK_UpdateSoftware_pfn)
-        GetProcAddress ( hInjectorDLL,
-                           "SK_UpdateSoftware" );
-
-    SK_FetchVersionInfo_pfn SK_FetchVersionInfo =
-      (SK_FetchVersionInfo_pfn)
-        GetProcAddress ( hInjectorDLL,
-                           "SK_FetchVersionInfo" );
-
-    if (config.system.injector.find (L"SpecialK") == std::wstring::npos)
-    {
-      if ( SK_FetchVersionInfo != nullptr &&
-           SK_UpdateSoftware   != nullptr )
-      {
-        if (SK_FetchVersionInfo (L"UnX"))
-        {
-          SK_UpdateSoftware (L"UnX");
-        }
-      }
-    }
-  }
+  // Updates are distributed by UnX Manager. The legacy Special K updater
+  // targets the abandoned upstream catalog and must not replace this fork.
 }
 
 

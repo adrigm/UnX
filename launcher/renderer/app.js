@@ -31,8 +31,10 @@ function warnings() {
   return [...(state.inspection?.conflicts || []), ...(state.inspection?.warnings || []), ...state.settingsWarnings].map((warning) => typeof warning === 'string' ? warning : warning.message).filter(Boolean);
 }
 function titleFor(id) { return categoryNames[id] || state.schema.categories.find((category) => category.id === id)?.label || id; }
-function controlValue(setting) { return state.values[setting.id] ?? setting.default; }
-function defaults() { return Object.fromEntries(state.schema.settings.map((setting) => [setting.id, setting.default])); }
+function settingUnavailable(setting) { return state.platform === 'linux' && setting.id === 'textures.cache'; }
+function defaultValue(setting) { return settingUnavailable(setting) ? false : setting.default; }
+function controlValue(setting) { return settingUnavailable(setting) ? false : state.values[setting.id] ?? setting.default; }
+function defaults() { return Object.fromEntries(state.schema.settings.map((setting) => [setting.id, defaultValue(setting)])); }
 function refreshFooter() {
   const changed = dirty();
   $('save-dot').className = `save-dot ${changed ? 'dirty' : installed() ? 'saved' : ''}`;
@@ -44,7 +46,9 @@ function refreshFooter() {
   $('reset-page').disabled = state.busy || ['setup', 'maintenance'].includes(state.page) || Boolean(state.search);
   $('open-folder').disabled = state.busy || !valid();
   for (const id of ['browse-folder', 'detect-folders', 'inspect-folder', 'game-folder']) $(id).disabled = state.busy;
-  document.querySelectorAll('[data-setting], #navigation button').forEach((node) => { node.disabled = state.busy; });
+  document.querySelectorAll('[data-setting], #navigation button').forEach((node) => {
+    node.disabled = state.busy || (state.platform === 'linux' && node.getAttribute('data-setting') === 'textures.cache');
+  });
   const workspaceState = { dirty: changed, busy: state.busy };
   if (JSON.stringify(workspaceState) !== lastWorkspaceState) {
     lastWorkspaceState = JSON.stringify(workspaceState);
@@ -145,13 +149,14 @@ function renderSetup(content) {
   ]));
   grid.append(installation);
   const overview = element('article', 'panel'); overview.append(element('h2', '', 'Installation details'));
-  overview.append(summaryLine('Platform', state.platform === 'linux' ? 'Linux · Steam / Proton' : 'Windows · Steam'), summaryLine('Mod version', '0.9.2.1'), summaryLine('Offline package', state.payloadAvailable ? 'Included' : 'Not prepared'), summaryLine('Backup protection', 'Automatic'), summaryLine('Configuration', `${state.schema.settings.length} available settings`));
+  overview.append(summaryLine('Platform', state.platform === 'linux' ? 'Linux · Steam / Proton' : 'Windows · Steam'), summaryLine('Mod version', '0.10.0'), summaryLine('Offline package', state.payloadAvailable ? 'Included' : 'Not prepared'), summaryLine('Backup protection', 'Automatic'), summaryLine('Configuration', `${state.schema.settings.length} available settings`));
   const warningItems = warnings();
   if (warningItems.length) { const list = element('ul', 'warning-list'); for (const warning of warningItems) list.append(element('li', '', warning)); overview.append(list); }
   if (!state.payloadAvailable) overview.append(element('p', 'footnote', 'The developer payload has not been prepared. Build the bundled runtime before installing.'));
   grid.append(overview); content.append(grid);
 }
 function changeSetting(setting, value, card) {
+  if (settingUnavailable(setting)) return;
   state.values[setting.id] = value;
   card.classList.toggle('modified', value !== state.saved[setting.id]);
   const marker = card.querySelector('.modified-mark'); if (marker) marker.hidden = value === state.saved[setting.id];
@@ -163,7 +168,9 @@ function renderSetting(setting) {
   const heading = element('div', 'setting-heading'); const copy = element('div', 'setting-copy'); const label = element('label', 'setting-label', setting.label);
   label.htmlFor = `setting-${setting.id}`;
   if (setting.advanced) label.append(element('span', 'mini-tag', 'Advanced'));
-  copy.append(label, element('p', 'setting-help', setting.description)); heading.append(copy); card.append(heading);
+  copy.append(label, element('p', 'setting-help', settingUnavailable(setting)
+    ? 'Unavailable under Proton: the legacy texture cache can crash at startup. It stays disabled when settings are applied. Texture injection remains available.'
+    : setting.description)); heading.append(copy); card.append(heading);
   let control;
   if (setting.type === 'boolean') {
     const toggle = element('label', 'toggle'); control = element('input'); control.type = 'checkbox'; control.checked = Boolean(value);
@@ -197,7 +204,7 @@ function renderSetting(setting) {
     }
     wrapper.append(control); card.append(wrapper);
   }
-  control.id = `setting-${setting.id}`; control.setAttribute('data-setting', setting.id); control.disabled = state.busy;
+  control.id = `setting-${setting.id}`; control.setAttribute('data-setting', setting.id); control.disabled = state.busy || settingUnavailable(setting);
   control.setAttribute('aria-describedby', `help-${setting.id}`); copy.querySelector('.setting-help').id = `help-${setting.id}`;
   const meta = element('div', 'setting-meta');
   if (setting.restartRequired) meta.append(element('span', '', 'Applied next time you start the game'));
@@ -325,7 +332,7 @@ $('discovered-folders').addEventListener('change', (event) => chooseFolder(event
 $('open-folder').addEventListener('click', () => api.openGameFolder(state.gameDir).catch((error) => notice(messageOf(error), 'error')));
 $('apply-settings').addEventListener('click', () => installOrSave());
 $('play-game').addEventListener('click', () => launchGame());
-$('reset-page').addEventListener('click', () => { for (const setting of state.schema.settings.filter((item) => item.category === state.page)) state.values[setting.id] = setting.default; renderPage(); notice('This page has been reset to its defaults. Apply settings to save the changes.'); });
+$('reset-page').addEventListener('click', () => { for (const setting of state.schema.settings.filter((item) => item.category === state.page)) state.values[setting.id] = defaultValue(setting); renderPage(); notice('This page has been reset to its defaults. Apply settings to save the changes.'); });
 $('search').addEventListener('input', (event) => { state.search = event.target.value; renderPage(); });
 document.addEventListener('keydown', (event) => { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); $('search').focus(); } });
 window.addEventListener('beforeunload', (event) => { if (state.busy) { event.preventDefault(); event.returnValue = false; } });

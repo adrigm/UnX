@@ -28,6 +28,7 @@
 #include "log.h"
 #include "language.h"
 #include "language_preferences.h"
+#include "texture_cache_policy.h"
 #include "cheat.h"
 #include "input.h"
 
@@ -84,6 +85,28 @@ SKX_D3D11_MarkTextures_pfn      SKX_D3D11_MarkTextures     = nullptr;
 SKX_D3D11_EnableFullscreen_pfn  SKX_D3D11_EnableFullscreen = nullptr;
 
 extern wchar_t* UNX_GetExecutableName (void);
+
+static bool
+UNX_IsWineRuntime (void)
+{
+  // Wine (including Proton) exposes this symbol in ntdll. Inspect the loaded
+  // runtime rather than the host OS, since this is the same Win32 DLL on both.
+  static const bool wine_runtime = [] () {
+    HMODULE ntdll = GetModuleHandleW (L"ntdll.dll");
+    return ntdll != nullptr &&
+      GetProcAddress (ntdll, "wine_get_version") != nullptr;
+  } ();
+  return wine_runtime;
+}
+
+static void
+UNX_SetTextureCache (bool requested)
+{
+  config.textures.cache = unx::compatibility::TextureCacheEnabled (
+    requested, UNX_IsWineRuntime ());
+  if (SK_D3D11_EnableTexCache != nullptr)
+    SK_D3D11_EnableTexCache (config.textures.cache);
+}
 
 __declspec (dllimport) void __stdcall SK_ImGui_KeybindDialog (SK_Keybind* keybind);
 
@@ -725,7 +748,10 @@ UNX_LoadConfig (std::wstring name)
     SK_D3D11_SetResourceRoot (config.textures.resource_root.c_str ());
     SK_D3D11_EnableTexDump   (config.textures.dump);
     SK_D3D11_EnableTexInject (config.textures.inject);
-    SK_D3D11_EnableTexCache  (config.textures.cache);
+    UNX_SetTextureCache     (config.textures.cache);
+
+    if (UNX_IsWineRuntime () && dll_log != nullptr)
+      dll_log->Log (L"[ Compatibility ] Wine/Proton: legacy texture cache disabled; texture injection unchanged.");
 
     if (config.textures.inject)
       SK_D3D11_AddTexHash (L"Title.dds", 0xA4FFC068, 0x00);
@@ -749,6 +775,14 @@ UNX_LoadConfig (std::wstring name)
 void
 UNX_SaveConfig (std::wstring name, bool close_config)
 {
+  if (UNX_IsWineRuntime ())
+  {
+    // Keep the on-disk value and any later configuration changes consistent
+    // with the runtime guard. Do not rewrite the Windows cache preference.
+    UNX_SetTextureCache (config.textures.cache);
+    textures.cache->store (config.textures.cache);
+  }
+
   input.remap_dinput8->store        (config.input.remap_dinput8);
 
   //input.block_windows->store        (config.input.block_windows);

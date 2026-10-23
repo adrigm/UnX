@@ -335,3 +335,138 @@ test('Linux case aliases of managed proxy DLLs are rejected before installing du
   assert.equal(await fs.readFile(path.join(game, 'DXGI.DLL'), 'utf8'), 'foreign upper-case proxy');
   await assert.rejects(fs.stat(path.join(game, 'unx.dll')), { code: 'ENOENT' });
 });
+
+test('Linux installation and settings enforce both cache flags while preserving texture injection and custom data', async () => {
+  const { game } = await fixture();
+  installer._test.hooks.platform = 'linux';
+  const unx = ini.encode({ text: '; retain encoding\r\n[UnX.Textures]\r\nCache=true ; legacy\r\nInject=true\r\nDump=false\r\nCustom=keep\r\n', encoding: 'utf16be', bom: true });
+  const dxgi = Buffer.from('; keep runtime settings\n[Textures.D3D11]\nCache=true\nInject=true\nOther=custom\n');
+  await fs.writeFile(path.join(game, 'UnX.ini'), unx);
+  await fs.writeFile(path.join(game, 'dxgi.ini'), dxgi);
+  const loaded = await installer.loadSettings(game);
+  assert.equal(loaded.values['textures.cache'], false);
+  assert.ok(loaded.warnings.some(item => item.code === 'PROTON_TEXTURE_CACHE_ENABLED'));
+  assert.deepEqual(await fs.readFile(path.join(game, 'UnX.ini')), unx, 'Loading settings must not write files.');
+  const result = await installer.installOrUpdate(game, { 'textures.cache': true });
+  assert.ok(result.warnings.some(item => item.code === 'PROTON_TEXTURE_CACHE_ENABLED'));
+  for (const [file, section] of [['UnX.ini', 'UnX.Textures'], ['dxgi.ini', 'Textures.D3D11']]) {
+    const document = ini.parse(await fs.readFile(path.join(game, file)));
+    assert.equal(ini.get(document, section, 'Cache'), 'false');
+    assert.equal(ini.get(document, section, 'Inject'), 'true');
+    assert.match(document.text, /(?:Custom=keep|Other=custom)/);
+  }
+  const edited = await fs.readFile(path.join(game, 'UnX.ini'));
+  assert.equal(ini.decode(edited).encoding, 'utf16be');
+  assert.equal(ini.decode(edited).text, ini.decode(unx).text.replace('Cache=true', 'Cache=false'));
+  assert.ok(!(await installer.inspectInstallation(game)).warnings.some(item => item.code === 'PROTON_TEXTURE_CACHE_ENABLED'));
+  // An old client or manual API caller cannot turn it back on during Apply.
+  await installer.saveSettings(game, { 'textures.cache': true, 'textures.inject': false });
+  const saved = ini.parse(await fs.readFile(path.join(game, 'UnX.ini')));
+  assert.equal(ini.get(saved, 'UnX.Textures', 'Cache'), 'false');
+  assert.equal(ini.get(saved, 'UnX.Textures', 'Inject'), 'false', 'Explicit injection preferences remain editable.');
+  assert.equal(ini.get(ini.parse(await fs.readFile(path.join(game, 'dxgi.ini'))), 'Textures.D3D11', 'Cache'), 'false');
+  await installer.uninstall(game);
+  assert.deepEqual(await fs.readFile(path.join(game, 'UnX.ini')), unx);
+  assert.deepEqual(await fs.readFile(path.join(game, 'dxgi.ini')), dxgi);
+});
+
+test('Linux Apply repairs a cache flag missing from either INI without enabling injection', async () => {
+  const { game } = await fixture();
+  installer._test.hooks.platform = 'linux';
+  await fs.writeFile(path.join(game, 'UnX.ini'), '[UnX.Textures]\nInject=false\nCache=false\n');
+  await fs.writeFile(path.join(game, 'dxgi.ini'), '[Textures.D3D11]\nInject=false\n');
+  assert.ok((await installer.inspectInstallation(game)).warnings.some(item => item.code === 'PROTON_TEXTURE_CACHE_ENABLED'));
+  await installer.saveSettings(game, {});
+  for (const [file, section] of [['UnX.ini', 'UnX.Textures'], ['dxgi.ini', 'Textures.D3D11']]) {
+    const document = ini.parse(await fs.readFile(path.join(game, file)));
+    assert.equal(ini.get(document, section, 'Cache'), 'false');
+    assert.equal(ini.get(document, section, 'Inject'), 'false');
+  }
+});
+
+test('Windows retains texture cache defaults and user preferences without the Proton restriction', async () => {
+  const { game } = await fixture();
+  assert.equal((await installer.loadSettings(game)).values['textures.cache'], true);
+  await installer.installOrUpdate(game);
+  assert.equal((await installer.loadSettings(game)).values['textures.cache'], true);
+  assert.ok(!(await installer.inspectInstallation(game)).warnings.some(item => item.code === 'PROTON_TEXTURE_CACHE_ENABLED'));
+  await fs.writeFile(path.join(game, 'dxgi.ini'), '[Textures.D3D11]\nCache=true\nInject=false\nUnknown=keep\n');
+  await installer.saveSettings(game, { 'textures.cache': false });
+  assert.equal((await installer.loadSettings(game)).values['textures.cache'], false);
+  await installer.installOrUpdate(game);
+  assert.equal((await installer.loadSettings(game)).values['textures.cache'], false);
+  await installer.saveSettings(game, { 'textures.cache': true });
+  assert.equal((await installer.loadSettings(game)).values['textures.cache'], true);
+  const dxgi = ini.parse(await fs.readFile(path.join(game, 'dxgi.ini')));
+  assert.equal(ini.get(dxgi, 'Textures.D3D11', 'Cache'), 'true');
+  assert.equal(ini.get(dxgi, 'Textures.D3D11', 'Inject'), 'false');
+  assert.equal(ini.get(dxgi, 'Textures.D3D11', 'Unknown'), 'keep');
+});
+
+for (const targetPlatform of ['win32', 'linux']) {
+  test(`${targetPlatform} disables only legacy update preferences and restores originals exactly`, async () => {
+    const { game } = await fixture();
+    installer._test.hooks.platform = targetPlatform;
+    const versionDirectory = path.join(game, 'Version');
+    await fs.mkdir(versionDirectory);
+    const original = ini.encode({ text: '; custom updater\r\n[Version.Local]\r\nInstallPackage=MY_CUSTOM_BUILD,45\r\nBranch=Testing\r\nUnknown=retain\r\n\r\n[Update.User]\r\nFrequency = 6h ; cadence\r\nReminder=12345\r\nKeepDownloads=true\r\n', encoding: 'utf16le', bom: true });
+    const catalog = Buffer.from('; existing catalog must not change\r\n[Version.Latest]\r\nInstallPackage=UPSTREAM,45\r\n');
+    await fs.writeFile(path.join(versionDirectory, 'installed.ini'), original);
+    await fs.writeFile(path.join(versionDirectory, 'repository.ini'), catalog);
+    const installed = await installer.installOrUpdate(game);
+    const updated = await fs.readFile(path.join(versionDirectory, 'installed.ini'));
+    assert.equal(ini.decode(updated).encoding, 'utf16le');
+    assert.equal(ini.decode(updated).text, ini.decode(original).text.replace('6h ; cadence', 'never ; cadence').replace('Reminder=12345\r\n', ''));
+    assert.deepEqual(await fs.readFile(path.join(versionDirectory, 'repository.ini')), catalog);
+    await installer.restoreBackup(game, installed.backupId);
+    assert.deepEqual(await fs.readFile(path.join(versionDirectory, 'installed.ini')), original);
+    assert.deepEqual(await fs.readFile(path.join(versionDirectory, 'repository.ini')), catalog);
+    await installer.installOrUpdate(game);
+    await installer.uninstall(game);
+    assert.deepEqual(await fs.readFile(path.join(versionDirectory, 'installed.ini')), original);
+    assert.deepEqual(await fs.readFile(path.join(versionDirectory, 'repository.ini')), catalog);
+  });
+}
+
+test('a fresh installation creates inert updater metadata and uninstall removes only generated files', async () => {
+  const { game } = await fixture();
+  const result = await installer.installOrUpdate(game);
+  const installed = ini.parse(await fs.readFile(path.join(game, 'Version', 'installed.ini')));
+  assert.equal(ini.get(installed, 'Update.User', 'Frequency'), 'never');
+  assert.equal(ini.get(installed, 'Version.Local', 'Branch'), 'Latest');
+  assert.equal(ini.get(installed, 'Version.Local', 'InstallPackage'), undefined);
+  const repository = await fs.readFile(path.join(game, 'Version', 'repository.ini'));
+  assert.equal(ini.parse(repository).values.size, 0, 'The first-fetch sentinel must not advertise any version or download.');
+  assert.ok(result.files.some(file => file.path === 'Version/installed.ini'));
+  assert.ok(result.files.some(file => file.path === 'Version/repository.ini'));
+  await fs.writeFile(path.join(game, 'Version', 'user-notes.txt'), 'unrelated metadata');
+  await installer.uninstall(game);
+  await assert.rejects(fs.stat(path.join(game, 'Version', 'installed.ini')), { code: 'ENOENT' });
+  await assert.rejects(fs.stat(path.join(game, 'Version', 'repository.ini')), { code: 'ENOENT' });
+  assert.equal(await fs.readFile(path.join(game, 'Version', 'user-notes.txt'), 'utf8'), 'unrelated metadata');
+});
+
+test('failure after writing updater preferences rolls back metadata, cache changes and payload together', async () => {
+  const { game } = await fixture();
+  installer._test.hooks.platform = 'linux';
+  const original = Buffer.from('[UnX.Textures]\nCache=true\nInject=true\n');
+  await fs.writeFile(path.join(game, 'UnX.ini'), original);
+  await fs.mkdir(path.join(game, 'Version'));
+  const originalUpdater = Buffer.from('[Version.Local]\nInstallPackage=keep\n[Update.User]\nFrequency=6h\nReminder=987\n');
+  await fs.writeFile(path.join(game, 'Version', 'installed.ini'), originalUpdater);
+  let updaterWritten = false;
+  installer._test.hooks.beforeWrite = async (_index, change) => {
+    if (change.path === 'Version/repository.ini') {
+      updaterWritten = true;
+      assert.equal(ini.get(ini.parse(await fs.readFile(path.join(game, 'Version', 'installed.ini'))), 'Update.User', 'Frequency'), 'never');
+      throw new Error('simulated metadata write failure');
+    }
+  };
+  await assert.rejects(installer.installOrUpdate(game), { code: 'TRANSACTION_ROLLED_BACK' });
+  assert.equal(updaterWritten, true);
+  assert.deepEqual(await fs.readFile(path.join(game, 'UnX.ini')), original);
+  assert.deepEqual(await fs.readFile(path.join(game, 'Version', 'installed.ini')), originalUpdater);
+  for (const file of ['Version/repository.ini', 'dxgi.ini', 'unx.dll', '.unx-manager/state.json']) {
+    await assert.rejects(fs.stat(path.join(game, file)), { code: 'ENOENT' });
+  }
+});

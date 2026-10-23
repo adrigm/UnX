@@ -1,11 +1,12 @@
 # UnX Manager
 
-A portable, English-language installer and configuration editor for Untitled
-Project X and the Steam edition of Final Fantasy X/X-2 HD Remaster.
+Manager **1.0.1** bundles UnX **0.10.0**. It is a portable, English-language
+installer and configuration editor for Untitled Project X and the Steam edition
+of Final Fantasy X/X-2 HD Remaster.
 
 ## Use
 
-1. Start `UnX-Manager-1.0.0-windows-x64.exe` on Windows, or mark the Linux
+1. Start `UnX-Manager-1.0.1-windows-x64.exe` on Windows, or mark the Linux
    AppImage executable and start it.
 2. Select the detected Steam installation, or use **Browse** to choose the
    folder containing `FFX.exe` and `FFX-2.exe`.
@@ -24,9 +25,11 @@ On Linux, the Windows game runs through Steam's selected Proton version. The
 manager discovers native Steam, Flatpak Steam, and additional library folders.
 It sets `dxgi` overrides for the game's three executables inside the existing
 game-specific Proton prefix. If that prefix does not exist, run the game once
-through Steam, close it, and install again. Linux gameplay needs validation on
-the user's Proton and graphics configuration; the Linux package and its GUI
-are tested separately from the game.
+through Steam, close it, and install again. UnX 0.10.0 disables the legacy
+texture cache under Wine/Proton while retaining texture injection. The manager applies this compatibility setting on Linux.
+Windows keeps its existing texture-cache behavior. See the
+[release and validation notes](../docs/RELEASE-0.10.0.md) for the SteamOS tests
+and remaining gameplay coverage.
 
 ## Configuration and recovery
 
@@ -42,6 +45,8 @@ are tested separately from the game.
   export, and removal of files owned by the manager.
 - A foreign `dxgi.dll` is reported as a conflict and is not overwritten.
   Existing external modifications to owned files are protected during removal.
+- The bundled legacy Special K updater is disabled so it cannot offer an older
+  upstream package over this fork. Use this repository's releases for updates.
 - Diagnostics are saved locally; the app does not upload them or saved games.
 
 See [the settings reference](docs/SETTINGS.md) and

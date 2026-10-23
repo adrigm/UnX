@@ -1,6 +1,7 @@
 # Offline payload and native packages
 
-The launcher bundles the original UnX runtime and the corrected Win32 plugin.
+Manager **1.0.1** bundles the original UnX runtime and the corrected Win32
+UnX **0.10.0** plugin. Mod and manager use separate version numbers.
 The installation payload is assembled from the official
 [UnX 0.9.1.9 distribution](https://github.com/Kaldaien/UnX/releases/download/unx_091/UnX_0_9_1_9.7z),
 the package selected by upstream `version.ini`. Its archive is 13,967,265 bytes
@@ -130,8 +131,12 @@ electron-builder 26 default AppImage wrapper also adds `--no-sandbox` during
 normal launches. These checks cover packaged application and renderer startup;
 they do not validate FUSE mounting, sandboxed Linux execution, or an interactive
 installation. Backend transaction tests use temporary synthetic game folders.
-Actual Final Fantasy X/X-2 gameplay through Steam Proton has not been tested;
-the AppImage build and Xvfb test do not establish Proton game compatibility.
+Separate testing on SteamOS reproduced the startup crash with the legacy
+cache enabled and confirmed working startup with the cache off and injection
+on. That test used the preceding DLL with a local configuration workaround.
+The packaged smoke tests still do not establish game compatibility. The exact
+0.10.0 DLL and a complete gameplay matrix require their own validation; see
+[release notes](../../docs/RELEASE-0.10.0.md).
 
 The workflow uses read-only repository permissions, disables package-manager
 cache uploads, and specifies `--publish never`. It writes only runner-local
@@ -139,3 +144,32 @@ build outputs and GitHub Actions artifacts, retained for 14 days. It does not
 create/edit releases, push commits, upload upstream assets, or require a
 private draft release. Download the `unx-manager-windows-x64` and
 `unx-manager-linux-x64` artifacts for review.
+
+## Controlled release publication
+
+The separate `publish-release.yml` workflow has `actions: read` and
+`contents: write` only in its publishing job. It runs only when a commit on
+`fix/steam-25501027-speed` changes `docs/publish-release.json`. It uses the
+short-lived Actions job token; no token is embedded in the source or artifacts.
+
+The strict request contains exactly `tag`, `mod_version`, `manager_version`,
+`source_commit`, `build_run_id`, `sha256`, and `notes_path`. For this release,
+the values are `v0.10.0`, `0.10.0`, `1.0.1`, the full tested source SHA, its
+successful build-run ID, hashes of the seven assets, and
+`docs/RELEASE-0.10.0.md`. The seven assets are the Windows executable and
+sidecar, Linux AppImage and sidecar, `UnX-0.10.0.zip` and sidecar, and
+`payload-manifest.json`.
+
+Only the request file may differ between the tested source commit and the
+publishing commit. Before writing to the release API, the publisher verifies
+that all workflow files at the tested source commit match the repository's
+current default branch. Merge the reviewed source PR normally before sending
+the request; do not squash away the tested source commit. The exact-release
+SteamOS startup retest must be approved and recorded in the reviewed PR first.
+
+The publisher downloads the three artifacts from the successful source build,
+checks the reviewed bytes and complete payload inventory, and confirms that
+Windows and Linux share the same manifest and compiled DLL. It creates a
+draft, uploads and verifies all seven assets, then publishes it. An interrupted
+run can reuse matching draft assets. Existing tags and assets are never moved
+or overwritten. The release body includes the tested commit and CI-run link.
