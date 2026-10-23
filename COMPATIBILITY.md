@@ -59,6 +59,12 @@ Validation performed on 2026-10-23:
   without a crash. Logs confirmed successful hook and audio-patch transitions.
 - Selective warning-filter checks cover the exact message, other warnings,
   partial and extended messages, null text, and callers outside Special K.
+- The final DLL loaded its warning hook successfully (`status=0`). Connecting
+  the controller reached the selective filter; interactive testing confirmed
+  that the popup was absent and the controller continued to work. The same
+  final build was also checked in memory at x8: its multiplier was `8.0`, the
+  resolved tick hook was active, and the resolved audio entry contained the
+  intended three-byte skip instruction.
 
 FFX-2 gameplay and every individual cheat have not been exhaustively tested.
 These checks establish compatibility with the examined executables; later game
