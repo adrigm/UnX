@@ -18,12 +18,12 @@ jobs:
     name: Validate user-local Linux setup and rerun
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    env:
-      UNX_TEST_ROOT: ${{ runner.temp }}/unx-steamos-setup
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Choose a writable user workspace
+        run: printf 'UNX_TEST_ROOT=%s/unx-steamos-setup\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - name: Check shell syntax and usage
         run: |
           bash -n scripts/steamos-test-setup.sh
