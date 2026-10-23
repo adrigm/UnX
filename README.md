@@ -1,6 +1,14 @@
 # ***"Untitled" Project X***
 Technical Fixes and Enhancements for ***Final Fantasy X | X-2 HD Remaster***
 
+### UnX Manager for Windows and Linux
+
+The new [UnX Manager](launcher/README.md) installs the complete mod runtime,
+detects Steam libraries, and exposes 125 English-language configuration options.
+It includes backups, restoration, repair, per-game language settings, shortcut
+editing, and Steam launch controls. Portable `.exe` and `.AppImage` builds are
+generated as reviewable artifacts; release publication remains manual.
+
 ### Steam 2026 compatibility fork
 
 This fork fixes the FFX x2/x4/x8 speed-boost crash with Steam build `25501027`.

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>UnX Manager</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><img src="logo.svg" alt="" width="39" height="39"><div><strong>UnX<span> Manager</span></strong><small>UNTITLED PROJECT X</small></div></div>
+    <div class="sidebar-caption">YOUR WORKSPACE</div>
+    <nav id="navigation" aria-label="Configuration pages"></nav>
+    <div class="sidebar-bottom"><span class="platform-indicator"></span><span id="platform-label">Windows & Linux</span><span id="app-version">1.0.0</span></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar"><span id="breadcrumb">Workspace <span>/</span> Setup</span><div class="search-wrap"><span class="search-icon">⌕</span><input id="search" type="search" placeholder="Search every setting…" aria-label="Search all settings"><kbd>Ctrl K</kbd></div></header>
+    <main id="main" tabindex="-1">
+      <div class="page-heading"><div><div class="eyebrow" id="eyebrow">MAKE IT YOUR GAME</div><h1 id="page-title">A better journey through Spira.</h1><p id="page-description">Install UnX, tune your experience, and get straight to the game.</p></div><span class="version-chip">MOD <strong>0.9.2.1</strong></span></div>
+      <section class="destination-panel" aria-label="Game installation">
+        <div class="destination-top"><span class="small-label">GAME LOCATION</span><span id="install-status" class="status neutral">Waiting for a folder</span></div>
+        <div class="destination-controls"><div class="folder-symbol">▱</div><input id="game-folder" type="text" spellcheck="false" placeholder="Select the folder containing FFX.exe" aria-label="Game folder"><button id="inspect-folder" class="button subtle">Check</button><button id="browse-folder" class="button secondary">Browse…</button><button id="detect-folders" class="button icon-button" title="Find Steam installations" aria-label="Find Steam installations">↻</button></div>
+        <div class="destination-bottom"><span id="folder-note">Looking for your Steam library…</span><select id="discovered-folders" aria-label="Detected game installations" hidden></select><button id="open-folder" class="text-button" disabled>Open folder ↗</button></div>
+      </section>
+      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+      <div id="busy-progress" class="busy-progress" hidden><div></div><span id="busy-label">Working…</span></div>
+      <section id="content" aria-label="Settings"><div class="loading-placeholder">Preparing your workspace…</div></section>
+    </main>
+    <footer class="actionbar"><div class="save-status"><span id="save-dot" class="save-dot"></span><div><strong id="save-title">Your settings, your way</strong><small id="save-note">Select a game folder to get started.</small></div></div><div class="actions"><button id="reset-page" class="button subtle" disabled>Reset this page</button><button id="apply-settings" class="button primary" disabled>Install & apply settings</button><button id="play-game" class="button play" disabled><span>▶</span> Play</button></div></footer>
+  </div>
+  <dialog id="confirmation"><form method="dialog"><div class="dialog-mark">↺</div><h2 id="confirmation-title"></h2><p id="confirmation-text"></p><div class="dialog-actions"><button class="button secondary" value="cancel">Cancel</button><button id="confirmation-submit" class="button primary" value="confirm">Continue</button></div></form></dialog>
+</body>
+</html>

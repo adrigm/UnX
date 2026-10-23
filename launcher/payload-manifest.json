@@ -1,0 +1,636 @@
+{
+  "schemaVersion": 1,
+  "version": "0.9.2.1",
+  "appId": 359870,
+  "sourceRepository": "https://github.com/adrigm/UnX",
+  "baseline": {
+    "version": "0.9.1.9",
+    "filename": "UnX_0_9_1_9.7z",
+    "url": "https://github.com/Kaldaien/UnX/releases/download/unx_091/UnX_0_9_1_9.7z",
+    "releaseNotes": "https://github.com/Kaldaien/UnX/releases/tag/unx_091",
+    "sha256": "33808990207e76fd5a946bf1334563f0c41ba834490f77affce5f5bd1608ec83",
+    "size": 13967265,
+    "files": [
+      {
+        "path": "ReShade32.dll",
+        "size": 1035776,
+        "sha256": "37cc4f153e7591765d6ce6ed44df091ae305b67edb9364766b2f11fad44241a0"
+      },
+      {
+        "path": "ReShade32_SpecialK32.pdb",
+        "size": 13291520,
+        "sha256": "c4f795ab548ecf7ec218e29feed947c5fad7b002e5c91f379436459d19e3263c"
+      },
+      {
+        "path": "UnX_Calibrate.exe",
+        "size": 287744,
+        "sha256": "82d0daf8f55fbc5cb04c950882b88d254e70b8cb96e5786942fe574b7f61dae5"
+      },
+      {
+        "path": "UnX_Res/Title.dds",
+        "size": 5592560,
+        "sha256": "5e8dcbe7bf5acdde645b229f67d3858bd11c30832bb091903719f078797bc436"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/A.dds",
+        "size": 6248,
+        "sha256": "029b404860d9f9e036ea90cadbbac92346fd5cae607343e971eb018cd4fc7623"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/B.dds",
+        "size": 6248,
+        "sha256": "077a388cde54b5f219f6b04112011c58a8702133b8b1da81b76179907ecdddeb"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/BACK.dds",
+        "size": 6248,
+        "sha256": "0649dc5c5f4fec604117848a412ce83e35b73642bea7655d956e9a3e040ad3ef"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/ButtonMap.dds",
+        "size": 591896,
+        "sha256": "5ddcfe5c2e3a05a5cfb1cb8726a9639e90d3f2ed309aab88023bef3af3e3396d"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/DOWN.dds",
+        "size": 6248,
+        "sha256": "a47bad621d6dc70c89bf9c90fbed59ea78ce3e948e01637afdec62c0de38f31c"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/LB.dds",
+        "size": 6248,
+        "sha256": "0b7ef0757f57da0f25f3ec09140f2b4c4353b491510667c44eadde6eefb0bb67"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/LEFT.dds",
+        "size": 6248,
+        "sha256": "08a3a5bd9b763fc21896cc95d451b3964022eb673574a91c606d3ced12c50b97"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/LS.dds",
+        "size": 6248,
+        "sha256": "ec39e3e1a2843908579c985a8724043e471a4d5ba557ec73a4dfa99cc5824250"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/LT.dds",
+        "size": 6248,
+        "sha256": "f3fa2a28c6ffcfedac41623d2f4926a239ffab72775b966f7fa547979e4f6930"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/RB.dds",
+        "size": 6248,
+        "sha256": "ad796a7164392b554036b137b2da766c8d73acb6abd6fc9fdab1fa4f78762bf4"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/RIGHT.dds",
+        "size": 6248,
+        "sha256": "b7eca38e78b5ad3a3a703350b37d19977ef8e481c7ffe563da530a0d13bfe475"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/RS.dds",
+        "size": 6248,
+        "sha256": "113f918ce75cbac922695f83f760ed5ff3c38e665cf2e1c50b652ccfa993bb34"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/RT.dds",
+        "size": 6248,
+        "sha256": "ca35a3c85949f3f7ec15f227e578af8fe7cbbbe42d4523bd89189d0eaff3f58f"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/START.dds",
+        "size": 6248,
+        "sha256": "c33f8ee1644380c4024a24fdcf5b101ca92d27417030da3feb4c1b8ce64b038a"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/UP.dds",
+        "size": 6248,
+        "sha256": "001f9cb25a6d8c2c1b31172de1aea5eb6d29256530030738e0084f8f7fa166bc"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/X.dds",
+        "size": 6248,
+        "sha256": "bebcced296b0c563d4749555aea360987657b1b9bbcf2937955ca6a75f21c9e0"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS3/Y.dds",
+        "size": 6248,
+        "sha256": "6f1f5fecdf2d9b056a660aebca8b6aee67b8daa51e07e0aca92227282e275690"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/A.dds",
+        "size": 6248,
+        "sha256": "029b404860d9f9e036ea90cadbbac92346fd5cae607343e971eb018cd4fc7623"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/B.dds",
+        "size": 6248,
+        "sha256": "077a388cde54b5f219f6b04112011c58a8702133b8b1da81b76179907ecdddeb"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/BACK.dds",
+        "size": 6248,
+        "sha256": "7f013bed3f289eee7d3d27bcef2ec3f358636bf20f4c7d411fdc5ee3d0dc1b0b"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/ButtonMap.dds",
+        "size": 591896,
+        "sha256": "b1e36d17d600f4c03e6b69d2b88548e1a7d7c7aad1e08422a74a03963debf096"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/DOWN.dds",
+        "size": 6248,
+        "sha256": "a47bad621d6dc70c89bf9c90fbed59ea78ce3e948e01637afdec62c0de38f31c"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/LB.dds",
+        "size": 6248,
+        "sha256": "0b7ef0757f57da0f25f3ec09140f2b4c4353b491510667c44eadde6eefb0bb67"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/LEFT.dds",
+        "size": 6248,
+        "sha256": "08a3a5bd9b763fc21896cc95d451b3964022eb673574a91c606d3ced12c50b97"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/LS.dds",
+        "size": 6248,
+        "sha256": "ec39e3e1a2843908579c985a8724043e471a4d5ba557ec73a4dfa99cc5824250"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/LT.dds",
+        "size": 6248,
+        "sha256": "f3fa2a28c6ffcfedac41623d2f4926a239ffab72775b966f7fa547979e4f6930"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/RB.dds",
+        "size": 6248,
+        "sha256": "ad796a7164392b554036b137b2da766c8d73acb6abd6fc9fdab1fa4f78762bf4"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/RIGHT.dds",
+        "size": 6248,
+        "sha256": "b7eca38e78b5ad3a3a703350b37d19977ef8e481c7ffe563da530a0d13bfe475"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/RS.dds",
+        "size": 6248,
+        "sha256": "113f918ce75cbac922695f83f760ed5ff3c38e665cf2e1c50b652ccfa993bb34"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/RT.dds",
+        "size": 6248,
+        "sha256": "ca35a3c85949f3f7ec15f227e578af8fe7cbbbe42d4523bd89189d0eaff3f58f"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/START.dds",
+        "size": 6248,
+        "sha256": "84c5f51d2d47e104b27eb927b833f8d2d5cac623d1e42d3d4f8b9bf5c1f0f8f5"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/UP.dds",
+        "size": 6248,
+        "sha256": "001f9cb25a6d8c2c1b31172de1aea5eb6d29256530030738e0084f8f7fa166bc"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/X.dds",
+        "size": 6248,
+        "sha256": "bebcced296b0c563d4749555aea360987657b1b9bbcf2937955ca6a75f21c9e0"
+      },
+      {
+        "path": "UnX_Res/gamepads/PS4/Y.dds",
+        "size": 6248,
+        "sha256": "6f1f5fecdf2d9b056a660aebca8b6aee67b8daa51e07e0aca92227282e275690"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/A.dds",
+        "size": 6248,
+        "sha256": "dfde05420ca3c3c2723c0b24c773eb988b5b616fe6e9be8d62bb17004401c114"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/B.dds",
+        "size": 6248,
+        "sha256": "7c755192c259105df6bd76fbd3915acc1e684b8d5b31e15e96660e7d36ef1eb6"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/BACK.dds",
+        "size": 6248,
+        "sha256": "a24d234df3844c0d8a29f249081b8a197384df4bd244f3a0a50e7cf057639d72"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/ButtonMap.dds",
+        "size": 591896,
+        "sha256": "e657e1aeb31707429b0babb1841478e72b41d99309ebd848e7417ddb3b144a34"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/DOWN.dds",
+        "size": 6248,
+        "sha256": "a317fade3aef0055a8c955ab68d8e9855a97101702dc97a558f6f1cde31d5561"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/LB.dds",
+        "size": 6248,
+        "sha256": "d585b037de6612c3a841fc7a5306b5dded6dc4e034feeca7e440113ff6cc7643"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/LEFT.dds",
+        "size": 6248,
+        "sha256": "b1e4a75a14bd7936a59936bd59a9ed0e8b10f84b27cb448bbe0522ae952b78f8"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/LS.dds",
+        "size": 6248,
+        "sha256": "ec39e3e1a2843908579c985a8724043e471a4d5ba557ec73a4dfa99cc5824250"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/LT.dds",
+        "size": 6248,
+        "sha256": "dd6ec14f4708036d2cc68dcf9211ece64e14815056d429abd4eae547650aee21"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/RB.dds",
+        "size": 6248,
+        "sha256": "3ad5c0a7d85b9d680652119292751dae3e718b9a38872eba2dd352645f7211bb"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/RIGHT.dds",
+        "size": 6248,
+        "sha256": "1b2f36f32c7b0c5538a4cdc02ef0eb08d53668a8465af31f6375e6eb0d47ec8d"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/RS.dds",
+        "size": 6248,
+        "sha256": "113f918ce75cbac922695f83f760ed5ff3c38e665cf2e1c50b652ccfa993bb34"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/RT.dds",
+        "size": 6248,
+        "sha256": "a377899ad920872626cb950dcfc6664db9394a6a3d6088df82a6b113d9650032"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/START.dds",
+        "size": 6248,
+        "sha256": "0a3cec9b415b420889586c1bbcf51d614e54a7a099f9ac8e48b096c44b9281c4"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/UP.dds",
+        "size": 6248,
+        "sha256": "93d8c7a1a227bf1f2865d218d2a3db58dd2188e0add92f7fdb0107be701b2d9d"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/X.dds",
+        "size": 6248,
+        "sha256": "4752b3109193b9ebcbbe449bf9c434bd2fcf7d0c93df6750f787d9a2f8c52f9f"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Glossy/Y.dds",
+        "size": 6248,
+        "sha256": "4bad62d15019dec3bc569411b88188d9a3164f442a7dfab9318803ac37a04ca6"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/A.dds",
+        "size": 12464,
+        "sha256": "62ec629ef072b2f8d492927302e5db634b3e96d87fa29afd57e67ca402194630"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/B.dds",
+        "size": 12464,
+        "sha256": "4ac6f94efbd755404674ef29c945bf4cbb3cf5d38712a3c4b2452846ea8d0f9c"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/BACK.dds",
+        "size": 10624,
+        "sha256": "625680ffe6575d103ff2a61ea9525b93303245ff738e2c8860ebbe99ddb2de61"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/ButtonMap.dds",
+        "size": 591896,
+        "sha256": "efe8dbbc91085bdd6cb0c2f612a215c8002dd1cfa1623b5ee00a138d13219fd4"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/DOWN.dds",
+        "size": 16944,
+        "sha256": "3de577b017fed7da208b4af145c0e556e9bfec75b01696298ac57be7ca0f4407"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/LB.dds",
+        "size": 6248,
+        "sha256": "d94eef1e529da725415d87739ea675e0520696c5adf7777b68ba4a3e015dcbcf"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/LEFT.dds",
+        "size": 16944,
+        "sha256": "cd3271fd3ec62a1f38c3c1e75d9fb28f1f3c5172cc427a1081de19b161452c3f"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/LS.dds",
+        "size": 9936,
+        "sha256": "20ea39ffe5bda39b6bb8ab53ef4ec6f38c8e47173c50207f84475699e721f2fe"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/LT.dds",
+        "size": 6248,
+        "sha256": "c39b4998619744f4e8c03726371b77b9fa99bafc8a16a94d3778e668e69fc08c"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/LT2.dds",
+        "size": 6248,
+        "sha256": "f3fa2a28c6ffcfedac41623d2f4926a239ffab72775b966f7fa547979e4f6930"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/RB.dds",
+        "size": 6248,
+        "sha256": "130f736e5eeaaff6c37dbfd447370231d76249c4b98c500f820c91bd360cf404"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/RIGHT.dds",
+        "size": 16944,
+        "sha256": "825bb844b8d3170e13de5ecef49b69da0cde9cff48a835dc252d464dad02db4c"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/RS.dds",
+        "size": 9936,
+        "sha256": "e2f9ec19b01ef65b2646f6880ad06f8de6bfa418b63f942ae049aa8a4c54ca81"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/RT.dds",
+        "size": 6248,
+        "sha256": "ce525b58e6ff090b97d58dc2a0d6998732150e0561352205557eddf4aae0e30c"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/START.dds",
+        "size": 10624,
+        "sha256": "74fb579fcdaf7680fdc6be7703c076d3459f1bfbd58a6f8486056f5319562884"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/UP.dds",
+        "size": 16944,
+        "sha256": "663d17f80b07fc76bf1f2094802a01ee42ba164f82e686c06c3d2ffc0289f06c"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/X.dds",
+        "size": 12464,
+        "sha256": "857df156cc21a16e8ea40607a5bb1fdfd5dd275b12a4218d48682c37b6ef48f0"
+      },
+      {
+        "path": "UnX_Res/gamepads/PlayStation_Simple/Y.dds",
+        "size": 12464,
+        "sha256": "448a96f17afe4a6c4aac7eb8fff2415899fdf02bfa41745eef387027b6417a43"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/A.dds",
+        "size": 6248,
+        "sha256": "b7093f6272ed24d2032d45a46ceeef965df8696092c6330b9efa6c61888bbb42"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/B.dds",
+        "size": 6248,
+        "sha256": "8ca4e8ab70a9516077c038d5cd24fabc8db693b58eed6272610713412039f675"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/BACK.dds",
+        "size": 6248,
+        "sha256": "909e26424df6ea7f59f24723aa688b5bade0f2bbbcc865c58239dbf574c2cc49"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/ButtonMap.dds",
+        "size": 591896,
+        "sha256": "febaeffb17e2bda7fc3bfb3625a7da8583db1cc6d213408b4cdf069e0bed4d9c"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/DOWN.dds",
+        "size": 6248,
+        "sha256": "c1bc21dfa3fbd915a097c85c9790a9ade91a0205e54f64e003aa0a2c83476562"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/LB.dds",
+        "size": 6248,
+        "sha256": "8138458ffa233538b31dd5d58c7593df33ad5661697161a9805080464614ff13"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/LEFT.dds",
+        "size": 6248,
+        "sha256": "f267372f0d9433d4596f404dcc9b194f656b9c0f459391ca6c50b8a9b692ed3d"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/LS.dds",
+        "size": 6248,
+        "sha256": "ec39e3e1a2843908579c985a8724043e471a4d5ba557ec73a4dfa99cc5824250"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/LT.dds",
+        "size": 6248,
+        "sha256": "425df3b1b8339c6c40b98230744065e0d35e2c5b4c2c0173b8a799a2965d8afe"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/RB.dds",
+        "size": 6248,
+        "sha256": "32540c5124f78fc21ec828424d6434193c516ed31afdca98899cf97d0836a77b"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/RIGHT.dds",
+        "size": 6248,
+        "sha256": "82a327a5242c648d1e309966c3819b08ea565e97c3b4abe3e4aa0a97e18f117d"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/RS.dds",
+        "size": 6248,
+        "sha256": "113f918ce75cbac922695f83f760ed5ff3c38e665cf2e1c50b652ccfa993bb34"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/RT.dds",
+        "size": 6248,
+        "sha256": "9c71a14c6c77406f80e4723702572d0ac18682de325eba21d9e035f8d942013e"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/START.dds",
+        "size": 6248,
+        "sha256": "1335f73dacecaa3018164f452473fdc4ecbae57d7500200bd372ffc92b1aa052"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/UP.dds",
+        "size": 6248,
+        "sha256": "edb15c77997ad531af65d3adb62fddfee24c4a67dacf4f4a3f21c0adfee3bf43"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/X.dds",
+        "size": 6248,
+        "sha256": "f4b4d81376d6ecde87a67d5b0169a273675503958617560d370d8a8466c3ba7a"
+      },
+      {
+        "path": "UnX_Res/gamepads/Xbox360/Y.dds",
+        "size": 6248,
+        "sha256": "932609b5bdf3684b844d713d49987b32e6ce3ae1565d10aa8429b099992e69e3"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/A.dds",
+        "size": 6248,
+        "sha256": "7dd40512d19097abd2014cce1fa230f21db71f48eb18a06133f2eea63e5467b8"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/B.dds",
+        "size": 6248,
+        "sha256": "8b75e71e18e071d5d89819d450f84700a8eaa779ec6cce4785021ef0374f4aae"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/BACK.dds",
+        "size": 6248,
+        "sha256": "7d234fddfe3660b8ce2e871424063a289721e1fba8ddd1be4e758f8fa8c41ae0"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/ButtonMap.dds",
+        "size": 591896,
+        "sha256": "4361951d1b2e264d53b80d8883383fa00e9973d992f9b2b9067d44483eff4e4f"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/DOWN.dds",
+        "size": 6248,
+        "sha256": "007392907076de0e36f24b4290e158eaa4bb6bdc4ceb782afde38e7ae5b7801f"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/LB.dds",
+        "size": 6248,
+        "sha256": "8138458ffa233538b31dd5d58c7593df33ad5661697161a9805080464614ff13"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/LEFT.dds",
+        "size": 6248,
+        "sha256": "4f532b76f0a22125d268f2d96da40084cfc815022e156c23b34008e8be9a24a8"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/LS.dds",
+        "size": 6248,
+        "sha256": "ec39e3e1a2843908579c985a8724043e471a4d5ba557ec73a4dfa99cc5824250"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/LT.dds",
+        "size": 6248,
+        "sha256": "425df3b1b8339c6c40b98230744065e0d35e2c5b4c2c0173b8a799a2965d8afe"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/RB.dds",
+        "size": 6248,
+        "sha256": "32540c5124f78fc21ec828424d6434193c516ed31afdca98899cf97d0836a77b"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/RIGHT.dds",
+        "size": 6248,
+        "sha256": "c1a47c1279b4cc62e9a40a774cd5508a567adda4a7d2be2cecd49d25822022a6"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/RS.dds",
+        "size": 6248,
+        "sha256": "113f918ce75cbac922695f83f760ed5ff3c38e665cf2e1c50b652ccfa993bb34"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/RT.dds",
+        "size": 6248,
+        "sha256": "9c71a14c6c77406f80e4723702572d0ac18682de325eba21d9e035f8d942013e"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/START.dds",
+        "size": 6248,
+        "sha256": "614cf0bdb2779be18674724dca8a17d406f729a32beedee0d434e1baae354709"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/UP.dds",
+        "size": 6248,
+        "sha256": "d00a331c71821a329264f2831d1162cdab9f297af9798e9a0e34c1297feb8fa4"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/X.dds",
+        "size": 6248,
+        "sha256": "54f886deb5a9ff869dba7c20c830f8b37d5a4abc2a179a69a187b4b2adbb40a1"
+      },
+      {
+        "path": "UnX_Res/gamepads/XboxOne/Y.dds",
+        "size": 6248,
+        "sha256": "8a5982c3c65a60e92d2d1b31b14cd91081e7800dd26ac2ab846b7b4dfe241144"
+      },
+      {
+        "path": "UnX_Res/inject/textures/Place Texture Mods Newer Than July 2016 Here",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "UnX_Res/inject/textures/UnX_Old/Place Pre-v 0.6.0 Texture Mods Here",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "default_ReShade32.ini",
+        "size": 73,
+        "sha256": "9faf2710358872cc9e0381be6ae0c59b8338cda7c7a7a0ef2fbd5a0c3f3bf4ad"
+      },
+      {
+        "path": "default_UnX.ini",
+        "size": 1340,
+        "sha256": "c23fcc9b9a508c54cf5fcc4c2dd3d4371c2b70c58d8b5f0198d53a1e36986daf"
+      },
+      {
+        "path": "default_d3d11_shaders.ini",
+        "size": 384,
+        "sha256": "88f24df29aeb0d61c38114d8ac1f5c1ae115e6262374dd47a2efa298b373c5c2"
+      },
+      {
+        "path": "default_dxgi.ini",
+        "size": 6322,
+        "sha256": "ed42e32ba5aaeef4b28b79f577917d7bb133804c4bb76c18a6b9c3d2ca0dd6dc"
+      },
+      {
+        "path": "dxgi.dll",
+        "size": 7183360,
+        "sha256": "29e9e53aacb0e00aac15b10a88e539be47a0b51fe4c34801fabaccae4cd11629"
+      },
+      {
+        "path": "dxgi.pdb",
+        "size": 62500864,
+        "sha256": "c0aa4bd7249cf009c9ec4f3928039723a67bc3df76641edcaf0e8afc9231d11e"
+      },
+      {
+        "path": "unx.dll",
+        "size": 214528,
+        "sha256": "c237eefcebbb85122d47faf5d636e473aaa94365c5cbc35380fc6db9bc5c72a4"
+      },
+      {
+        "path": "unx.pdb",
+        "size": 6123520,
+        "sha256": "1133da00152204691556d78b02c0098c83c0d5ac1c079c1622f21babac43b3ae"
+      }
+    ]
+  },
+  "excludeFiles": [
+    "dxgi.pdb",
+    "ReShade32_SpecialK32.pdb",
+    "unx.pdb"
+  ],
+  "replacementFile": "unx.dll",
+  "knownSpecialK": {
+    "version": "0.8.60.2",
+    "path": "dxgi.dll",
+    "sha256": "29e9e53aacb0e00aac15b10a88e539be47a0b51fe4c34801fabaccae4cd11629"
+  },
+  "requiredWindowsRuntimes": [
+    {
+      "name": "Microsoft Visual C++ x86 runtime (v14)",
+      "libraries": [
+        "MSVCP140.dll",
+        "CONCRT140.dll",
+        "VCOMP140.dll",
+        "VCRUNTIME140.dll"
+      ]
+    },
+    {
+      "name": "DirectX legacy x86 runtime (June 2010)",
+      "libraries": [
+        "D3DCOMPILER_43.dll",
+        "d3dx9_43.dll"
+      ]
+    }
+  ],
+  "notes": [
+    "All selected assets are from the official archive. Only debug PDB files are excluded and unx.dll is replaced.",
+    "No live INI settings, third-party texture mods, game binaries, save files, or files from an installed game are included.",
+    "Stock ReShade32.dll and its default configuration are retained because default_dxgi.ini imports it.",
+    "The payload installs offline into an existing Steam game installation. Microsoft/Steam runtime prerequisites are not redistributed by this payload."
+  ]
+}
