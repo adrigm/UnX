@@ -1,6 +1,45 @@
 # ***"Untitled" Project X***
 Technical Fixes and Enhancements for ***Final Fantasy X | X-2 HD Remaster***
 
+### UnX 0.10.0 and Manager 1.0.1 for Windows and Linux
+
+The new [UnX Manager](launcher/README.md) installs the complete mod runtime,
+detects Steam libraries, and exposes 125 English-language configuration options.
+It includes backups, restoration, repair, per-game language settings, shortcut
+editing, and Steam launch controls. Portable `.exe` and `.AppImage` builds are
+available from the [GitHub release](https://github.com/adrigm/UnX/releases/tag/v0.10.0).
+UnX 0.10.0 disables the legacy texture cache under Wine/Proton to avoid the
+SteamOS startup crash; texture injection stays available and native Windows
+cache behavior is preserved. The obsolete Special K updater is disabled.
+See [release notes and validation limits](docs/RELEASE-0.10.0.md).
+
+The self-contained [SteamOS handoff](docs/STEAMOS-HANDOFF.md) and
+[user-local setup script](scripts/steamos-test-setup.sh) describe the historical
+Manager 1.0.0 baseline used to investigate the issue. Their pinned binaries and
+checksums intentionally remain unchanged; use the new release for the fix.
+
+### Steam 2026 compatibility fork
+
+This fork fixes the FFX x2/x4/x8 speed-boost crash with Steam build `25501027`.
+The updated executable moved the game-tick and audio functions. UnX now finds
+their entry points with unique instruction signatures and checks hook and
+memory operations before applying a patch. The affected quick-load, time-stop,
+and cheat targets have also been updated.
+
+The legacy Special K warning about an infinite XInput haptic-feedback loop is
+filtered when connecting a controller. Its recursion protection remains active;
+other warnings and the controller/rumble settings are preserved.
+
+For an existing UnX installation, close the game, back up `unx.dll`, and replace
+it with the Win32 DLL from this fork's release. Keep the legacy Special K
+`dxgi.dll` supplied with UnX. Cycle FFX speed with **Ctrl+Shift+H** or your
+configured controller shortcut.
+
+See [build and test instructions](BUILD.md) and the
+[compatibility and validation notes](COMPATIBILITY.md).
+
+---
+
 Originally envisioned as a quick-fix solution for a few technical problems in the otherwise excellent PC port of ***Final Fantasy X | X-2 HD Remaster***, this mod aims to customize some of the game's internal working systems such as cutscene skipping, UI and language selection. The "fix" part of the mod should still be very minimal, but there is still room to polish off many aspects of gameplay.
 
 This mod is derived partially from work done on language selection by the Steam community; refer to `AUTHORS`. _If you find your name in there (Steam username) and would like to be credited differently, please let me know on Steam._

@@ -1,0 +1,2832 @@
+{
+  "categories": [
+    {
+      "id": "gameplay",
+      "label": "Gameplay",
+      "description": "FFX speed boost, party AP, Sensor, and character options."
+    },
+    {
+      "id": "languages",
+      "label": "Languages",
+      "description": "Choose voice, sound effect, and video assets globally or per game."
+    },
+    {
+      "id": "input",
+      "label": "Input",
+      "description": "Controller icons, keyboard shortcuts, controller combinations, and input behavior."
+    },
+    {
+      "id": "display",
+      "label": "Display",
+      "description": "Window mode, cursor behavior, frame pacing, and presentation."
+    },
+    {
+      "id": "textures",
+      "label": "Textures",
+      "description": "Texture replacement, caching, and resource settings."
+    },
+    {
+      "id": "advanced",
+      "label": "Advanced",
+      "description": "Compatibility, detailed input mapping, and diagnostic settings."
+    }
+  ],
+  "settings": [
+    {
+      "id": "gameplay.partyAp",
+      "category": "gameplay",
+      "label": "Entire party earns AP",
+      "description": "FFX: award AP to eligible party members without requiring every member to act.",
+      "type": "boolean",
+      "default": false,
+      "file": "UnX_Booster.ini",
+      "section": "Boost.FFX",
+      "key": "EntirePartyEarnsAP",
+      "restartRequired": true
+    },
+    {
+      "id": "gameplay.sensor",
+      "category": "gameplay",
+      "label": "Permanent Sensor",
+      "description": "FFX: show enemy information without equipping a weapon with Sensor.",
+      "type": "boolean",
+      "default": false,
+      "file": "UnX_Booster.ini",
+      "section": "Boost.FFX",
+      "key": "GrantPermanentSensor",
+      "restartRequired": true
+    },
+    {
+      "id": "gameplay.seymour",
+      "category": "gameplay",
+      "label": "Playable Seymour",
+      "description": "FFX: add Seymour to the playable party.",
+      "type": "boolean",
+      "default": false,
+      "file": "UnX_Booster.ini",
+      "section": "Fun.FFX",
+      "key": "PlayableSeymour",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "gameplay.maxSpeed",
+      "category": "gameplay",
+      "label": "Maximum speed",
+      "description": "FFX: speed boost cycles from 1x up to this multiplier.",
+      "type": "number",
+      "default": 8,
+      "file": "UnX_Booster.ini",
+      "section": "SpeedHack.FFX",
+      "key": "MaxSpeed",
+      "restartRequired": true,
+      "min": 1,
+      "max": 64,
+      "step": 1
+    },
+    {
+      "id": "gameplay.speedStep",
+      "category": "gameplay",
+      "label": "Speed step multiplier",
+      "description": "FFX: multiply the current speed by this amount when cycling speed boost.",
+      "type": "number",
+      "default": 2,
+      "file": "UnX_Booster.ini",
+      "section": "SpeedHack.FFX",
+      "key": "SpeedStep",
+      "restartRequired": true,
+      "min": 1.1,
+      "max": 8,
+      "step": 0.1
+    },
+    {
+      "id": "gameplay.skipDialogAtSpeed",
+      "category": "gameplay",
+      "label": "Skip dialogue at speed",
+      "description": "FFX: bypass audio synchronization at or above this speed. Set above the maximum speed to keep dialogue synchronization.",
+      "type": "number",
+      "default": 8,
+      "file": "UnX_Booster.ini",
+      "section": "SpeedHack.FFX",
+      "key": "SkipDialogAtSpeed",
+      "restartRequired": true,
+      "min": 1,
+      "max": 256,
+      "step": 1
+    },
+    {
+      "id": "gameplay.disableTimingHacks",
+      "category": "gameplay",
+      "label": "Disable custom speed timing",
+      "description": "FFX: disable UnX timing hooks and return speed to 1x.",
+      "type": "boolean",
+      "default": false,
+      "file": "UnX.ini",
+      "section": "UnX.Compatibility",
+      "key": "DisableTimingHacks",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "language.voice",
+      "category": "languages",
+      "label": "Voice language",
+      "description": "Choose asset language for all supported games. Text and subtitles follow the Steam game language.",
+      "type": "select",
+      "default": "en",
+      "file": "UnX_Language.ini",
+      "section": "Language.Master",
+      "key": "Voice",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": "en",
+          "label": "Use game language"
+        },
+        {
+          "value": "us",
+          "label": "English"
+        },
+        {
+          "value": "jp",
+          "label": "Japanese"
+        }
+      ]
+    },
+    {
+      "id": "language.soundEffects",
+      "category": "languages",
+      "label": "Sound effect language",
+      "description": "Choose asset language for all supported games. Text and subtitles follow the Steam game language.",
+      "type": "select",
+      "default": "en",
+      "file": "UnX_Language.ini",
+      "section": "Language.Master",
+      "key": "SoundEffects",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": "en",
+          "label": "Use game language"
+        },
+        {
+          "value": "us",
+          "label": "English"
+        },
+        {
+          "value": "jp",
+          "label": "Japanese"
+        }
+      ]
+    },
+    {
+      "id": "language.video",
+      "category": "languages",
+      "label": "Video language",
+      "description": "Choose asset language for all supported games. Text and subtitles follow the Steam game language.",
+      "type": "select",
+      "default": "en",
+      "file": "UnX_Language.ini",
+      "section": "Language.Master",
+      "key": "Video",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": "en",
+          "label": "Use game language"
+        },
+        {
+          "value": "us",
+          "label": "English"
+        },
+        {
+          "value": "jp",
+          "label": "Japanese"
+        }
+      ]
+    },
+    {
+      "id": "language.ffx.voice",
+      "category": "languages",
+      "label": "FFX voice",
+      "description": "Override the master asset language for FFX.",
+      "type": "select",
+      "default": "",
+      "file": "UnX_Language.ini",
+      "section": "FFX.exe",
+      "key": "Voice",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": "",
+          "label": "Inherit master"
+        },
+        {
+          "value": "en",
+          "label": "Use game language"
+        },
+        {
+          "value": "us",
+          "label": "English"
+        },
+        {
+          "value": "jp",
+          "label": "Japanese"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "language.ffx.soundEffects",
+      "category": "languages",
+      "label": "FFX sound effects",
+      "description": "Override the master asset language for FFX.",
+      "type": "select",
+      "default": "",
+      "file": "UnX_Language.ini",
+      "section": "FFX.exe",
+      "key": "SoundEffects",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": "",
+          "label": "Inherit master"
+        },
+        {
+          "value": "en",
+          "label": "Use game language"
+        },
+        {
+          "value": "us",
+          "label": "English"
+        },
+        {
+          "value": "jp",
+          "label": "Japanese"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "language.ffx.video",
+      "category": "languages",
+      "label": "FFX video",
+      "description": "Override the master asset language for FFX.",
+      "type": "select",
+      "default": "",
+      "file": "UnX_Language.ini",
+      "section": "FFX.exe",
+      "key": "Video",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": "",
+          "label": "Inherit master"
+        },
+        {
+          "value": "en",
+          "label": "Use game language"
+        },
+        {
+          "value": "us",
+          "label": "English"
+        },
+        {
+          "value": "jp",
+          "label": "Japanese"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "language.ffx2.voice",
+      "category": "languages",
+      "label": "FFX-2 voice",
+      "description": "Override the master asset language for FFX-2.",
+      "type": "select",
+      "default": "",
+      "file": "UnX_Language.ini",
+      "section": "FFX-2.exe",
+      "key": "Voice",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": "",
+          "label": "Inherit master"
+        },
+        {
+          "value": "en",
+          "label": "Use game language"
+        },
+        {
+          "value": "us",
+          "label": "English"
+        },
+        {
+          "value": "jp",
+          "label": "Japanese"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "language.ffx2.soundEffects",
+      "category": "languages",
+      "label": "FFX-2 sound effects",
+      "description": "Override the master asset language for FFX-2.",
+      "type": "select",
+      "default": "",
+      "file": "UnX_Language.ini",
+      "section": "FFX-2.exe",
+      "key": "SoundEffects",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": "",
+          "label": "Inherit master"
+        },
+        {
+          "value": "en",
+          "label": "Use game language"
+        },
+        {
+          "value": "us",
+          "label": "English"
+        },
+        {
+          "value": "jp",
+          "label": "Japanese"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "language.ffx2.video",
+      "category": "languages",
+      "label": "FFX-2 video",
+      "description": "Override the master asset language for FFX-2.",
+      "type": "select",
+      "default": "",
+      "file": "UnX_Language.ini",
+      "section": "FFX-2.exe",
+      "key": "Video",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": "",
+          "label": "Inherit master"
+        },
+        {
+          "value": "en",
+          "label": "Use game language"
+        },
+        {
+          "value": "us",
+          "label": "English"
+        },
+        {
+          "value": "jp",
+          "label": "Japanese"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "language.eternalCalm.voice",
+      "category": "languages",
+      "label": "Eternal Calm voice",
+      "description": "Override the master asset language for Eternal Calm.",
+      "type": "select",
+      "default": "",
+      "file": "UnX_Language.ini",
+      "section": "FFX&X-2_Will.exe",
+      "key": "Voice",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": "",
+          "label": "Inherit master"
+        },
+        {
+          "value": "en",
+          "label": "Use game language"
+        },
+        {
+          "value": "us",
+          "label": "English"
+        },
+        {
+          "value": "jp",
+          "label": "Japanese"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "language.eternalCalm.soundEffects",
+      "category": "languages",
+      "label": "Eternal Calm sound effects",
+      "description": "Override the master asset language for Eternal Calm.",
+      "type": "select",
+      "default": "",
+      "file": "UnX_Language.ini",
+      "section": "FFX&X-2_Will.exe",
+      "key": "SoundEffects",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": "",
+          "label": "Inherit master"
+        },
+        {
+          "value": "en",
+          "label": "Use game language"
+        },
+        {
+          "value": "us",
+          "label": "English"
+        },
+        {
+          "value": "jp",
+          "label": "Japanese"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "language.eternalCalm.video",
+      "category": "languages",
+      "label": "Eternal Calm video",
+      "description": "Override the master asset language for Eternal Calm.",
+      "type": "select",
+      "default": "",
+      "file": "UnX_Language.ini",
+      "section": "FFX&X-2_Will.exe",
+      "key": "Video",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": "",
+          "label": "Inherit master"
+        },
+        {
+          "value": "en",
+          "label": "Use game language"
+        },
+        {
+          "value": "us",
+          "label": "English"
+        },
+        {
+          "value": "jp",
+          "label": "Japanese"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "input.remapDirectInput",
+      "category": "input",
+      "label": "Enable DirectInput remapping",
+      "description": "Apply the DirectInput button map and UnX background input handling. Native XInput button assignments are unchanged.",
+      "type": "boolean",
+      "default": true,
+      "file": "UnX.ini",
+      "section": "UnX.Input",
+      "key": "RemapDirectInput",
+      "restartRequired": true
+    },
+    {
+      "id": "input.gamepadSlot",
+      "category": "input",
+      "label": "Controller slot",
+      "description": "Choose the XInput controller used by UnX shortcuts. Automatic currently selects slot 0.",
+      "type": "select",
+      "default": -1,
+      "file": "UnX.ini",
+      "section": "UnX.Input",
+      "key": "GamepadSlot",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": -1,
+          "label": "Automatic"
+        },
+        {
+          "value": 0,
+          "label": "Controller 1 (slot 0)"
+        },
+        {
+          "value": 1,
+          "label": "Controller 2 (slot 1)"
+        },
+        {
+          "value": 2,
+          "label": "Controller 3 (slot 2)"
+        },
+        {
+          "value": 3,
+          "label": "Controller 4 (slot 3)"
+        }
+      ]
+    },
+    {
+      "id": "input.fastExit",
+      "category": "input",
+      "label": "Fast exit",
+      "description": "Allow the game window to close without its usual confirmation handling.",
+      "type": "boolean",
+      "default": true,
+      "file": "UnX.ini",
+      "section": "UnX.Input",
+      "key": "FastExit",
+      "restartRequired": true
+    },
+    {
+      "id": "input.fixBackgroundInput",
+      "category": "advanced",
+      "label": "Filter background input",
+      "description": "Block keyboard and raw input messages while the game is inactive. Requires Fast exit to be enabled.",
+      "type": "boolean",
+      "default": false,
+      "file": "UnX.ini",
+      "section": "UnX.Input",
+      "key": "FixBackgroundInput",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "input.trapAltTab",
+      "category": "advanced",
+      "label": "Trap Alt+Tab notifications",
+      "description": "Prevent the game from receiving selected window activation notifications when changing applications.",
+      "type": "boolean",
+      "default": false,
+      "file": "UnX.ini",
+      "section": "UnX.Input",
+      "key": "TrapAltTab",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "input.controllerIcons",
+      "category": "input",
+      "label": "Controller button icons",
+      "description": "Choose an installed icon pack under the texture resource folder. Xbox packs change button artwork, not controller support.",
+      "type": "select",
+      "default": "PlayStation_Glossy",
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.Type",
+      "key": "TextureSet",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": "PlayStation_Glossy",
+          "label": "PlayStation Glossy"
+        },
+        {
+          "value": "PlayStation_Simple",
+          "label": "PlayStation Simple"
+        },
+        {
+          "value": "PS3",
+          "label": "PlayStation 3"
+        },
+        {
+          "value": "PS4",
+          "label": "PlayStation 4"
+        },
+        {
+          "value": "Xbox360",
+          "label": "Xbox 360"
+        },
+        {
+          "value": "XboxOne",
+          "label": "Xbox One"
+        }
+      ]
+    },
+    {
+      "id": "input.directInput.x",
+      "category": "advanced",
+      "label": "DirectInput: X / Square",
+      "description": "Map this logical button to a 1-based DirectInput button number. Requires DirectInput remapping; native XInput controls are unaffected.",
+      "type": "select",
+      "default": 1,
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.Remap",
+      "key": "XInput_X",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": 1,
+          "label": "Button 1"
+        },
+        {
+          "value": 2,
+          "label": "Button 2"
+        },
+        {
+          "value": 3,
+          "label": "Button 3"
+        },
+        {
+          "value": 4,
+          "label": "Button 4"
+        },
+        {
+          "value": 5,
+          "label": "Button 5"
+        },
+        {
+          "value": 6,
+          "label": "Button 6"
+        },
+        {
+          "value": 7,
+          "label": "Button 7"
+        },
+        {
+          "value": 8,
+          "label": "Button 8"
+        },
+        {
+          "value": 9,
+          "label": "Button 9"
+        },
+        {
+          "value": 10,
+          "label": "Button 10"
+        },
+        {
+          "value": 11,
+          "label": "Button 11"
+        },
+        {
+          "value": 12,
+          "label": "Button 12"
+        },
+        {
+          "value": 13,
+          "label": "Button 13"
+        },
+        {
+          "value": 14,
+          "label": "Button 14"
+        },
+        {
+          "value": 15,
+          "label": "Button 15"
+        },
+        {
+          "value": 16,
+          "label": "Button 16"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "input.directInput.a",
+      "category": "advanced",
+      "label": "DirectInput: A / Cross",
+      "description": "Map this logical button to a 1-based DirectInput button number. Requires DirectInput remapping; native XInput controls are unaffected.",
+      "type": "select",
+      "default": 2,
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.Remap",
+      "key": "XInput_A",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": 1,
+          "label": "Button 1"
+        },
+        {
+          "value": 2,
+          "label": "Button 2"
+        },
+        {
+          "value": 3,
+          "label": "Button 3"
+        },
+        {
+          "value": 4,
+          "label": "Button 4"
+        },
+        {
+          "value": 5,
+          "label": "Button 5"
+        },
+        {
+          "value": 6,
+          "label": "Button 6"
+        },
+        {
+          "value": 7,
+          "label": "Button 7"
+        },
+        {
+          "value": 8,
+          "label": "Button 8"
+        },
+        {
+          "value": 9,
+          "label": "Button 9"
+        },
+        {
+          "value": 10,
+          "label": "Button 10"
+        },
+        {
+          "value": 11,
+          "label": "Button 11"
+        },
+        {
+          "value": 12,
+          "label": "Button 12"
+        },
+        {
+          "value": 13,
+          "label": "Button 13"
+        },
+        {
+          "value": 14,
+          "label": "Button 14"
+        },
+        {
+          "value": 15,
+          "label": "Button 15"
+        },
+        {
+          "value": 16,
+          "label": "Button 16"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "input.directInput.b",
+      "category": "advanced",
+      "label": "DirectInput: B / Circle",
+      "description": "Map this logical button to a 1-based DirectInput button number. Requires DirectInput remapping; native XInput controls are unaffected.",
+      "type": "select",
+      "default": 3,
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.Remap",
+      "key": "XInput_B",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": 1,
+          "label": "Button 1"
+        },
+        {
+          "value": 2,
+          "label": "Button 2"
+        },
+        {
+          "value": 3,
+          "label": "Button 3"
+        },
+        {
+          "value": 4,
+          "label": "Button 4"
+        },
+        {
+          "value": 5,
+          "label": "Button 5"
+        },
+        {
+          "value": 6,
+          "label": "Button 6"
+        },
+        {
+          "value": 7,
+          "label": "Button 7"
+        },
+        {
+          "value": 8,
+          "label": "Button 8"
+        },
+        {
+          "value": 9,
+          "label": "Button 9"
+        },
+        {
+          "value": 10,
+          "label": "Button 10"
+        },
+        {
+          "value": 11,
+          "label": "Button 11"
+        },
+        {
+          "value": 12,
+          "label": "Button 12"
+        },
+        {
+          "value": 13,
+          "label": "Button 13"
+        },
+        {
+          "value": 14,
+          "label": "Button 14"
+        },
+        {
+          "value": 15,
+          "label": "Button 15"
+        },
+        {
+          "value": 16,
+          "label": "Button 16"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "input.directInput.y",
+      "category": "advanced",
+      "label": "DirectInput: Y / Triangle",
+      "description": "Map this logical button to a 1-based DirectInput button number. Requires DirectInput remapping; native XInput controls are unaffected.",
+      "type": "select",
+      "default": 4,
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.Remap",
+      "key": "XInput_Y",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": 1,
+          "label": "Button 1"
+        },
+        {
+          "value": 2,
+          "label": "Button 2"
+        },
+        {
+          "value": 3,
+          "label": "Button 3"
+        },
+        {
+          "value": 4,
+          "label": "Button 4"
+        },
+        {
+          "value": 5,
+          "label": "Button 5"
+        },
+        {
+          "value": 6,
+          "label": "Button 6"
+        },
+        {
+          "value": 7,
+          "label": "Button 7"
+        },
+        {
+          "value": 8,
+          "label": "Button 8"
+        },
+        {
+          "value": 9,
+          "label": "Button 9"
+        },
+        {
+          "value": 10,
+          "label": "Button 10"
+        },
+        {
+          "value": 11,
+          "label": "Button 11"
+        },
+        {
+          "value": 12,
+          "label": "Button 12"
+        },
+        {
+          "value": 13,
+          "label": "Button 13"
+        },
+        {
+          "value": 14,
+          "label": "Button 14"
+        },
+        {
+          "value": 15,
+          "label": "Button 15"
+        },
+        {
+          "value": 16,
+          "label": "Button 16"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "input.directInput.lb",
+      "category": "advanced",
+      "label": "DirectInput: Left shoulder",
+      "description": "Map this logical button to a 1-based DirectInput button number. Requires DirectInput remapping; native XInput controls are unaffected.",
+      "type": "select",
+      "default": 5,
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.Remap",
+      "key": "XInput_LB",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": 1,
+          "label": "Button 1"
+        },
+        {
+          "value": 2,
+          "label": "Button 2"
+        },
+        {
+          "value": 3,
+          "label": "Button 3"
+        },
+        {
+          "value": 4,
+          "label": "Button 4"
+        },
+        {
+          "value": 5,
+          "label": "Button 5"
+        },
+        {
+          "value": 6,
+          "label": "Button 6"
+        },
+        {
+          "value": 7,
+          "label": "Button 7"
+        },
+        {
+          "value": 8,
+          "label": "Button 8"
+        },
+        {
+          "value": 9,
+          "label": "Button 9"
+        },
+        {
+          "value": 10,
+          "label": "Button 10"
+        },
+        {
+          "value": 11,
+          "label": "Button 11"
+        },
+        {
+          "value": 12,
+          "label": "Button 12"
+        },
+        {
+          "value": 13,
+          "label": "Button 13"
+        },
+        {
+          "value": 14,
+          "label": "Button 14"
+        },
+        {
+          "value": 15,
+          "label": "Button 15"
+        },
+        {
+          "value": 16,
+          "label": "Button 16"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "input.directInput.rb",
+      "category": "advanced",
+      "label": "DirectInput: Right shoulder",
+      "description": "Map this logical button to a 1-based DirectInput button number. Requires DirectInput remapping; native XInput controls are unaffected.",
+      "type": "select",
+      "default": 6,
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.Remap",
+      "key": "XInput_RB",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": 1,
+          "label": "Button 1"
+        },
+        {
+          "value": 2,
+          "label": "Button 2"
+        },
+        {
+          "value": 3,
+          "label": "Button 3"
+        },
+        {
+          "value": 4,
+          "label": "Button 4"
+        },
+        {
+          "value": 5,
+          "label": "Button 5"
+        },
+        {
+          "value": 6,
+          "label": "Button 6"
+        },
+        {
+          "value": 7,
+          "label": "Button 7"
+        },
+        {
+          "value": 8,
+          "label": "Button 8"
+        },
+        {
+          "value": 9,
+          "label": "Button 9"
+        },
+        {
+          "value": 10,
+          "label": "Button 10"
+        },
+        {
+          "value": 11,
+          "label": "Button 11"
+        },
+        {
+          "value": 12,
+          "label": "Button 12"
+        },
+        {
+          "value": 13,
+          "label": "Button 13"
+        },
+        {
+          "value": 14,
+          "label": "Button 14"
+        },
+        {
+          "value": 15,
+          "label": "Button 15"
+        },
+        {
+          "value": 16,
+          "label": "Button 16"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "input.directInput.lt",
+      "category": "advanced",
+      "label": "DirectInput: Left trigger",
+      "description": "Map this logical button to a 1-based DirectInput button number. Requires DirectInput remapping; native XInput controls are unaffected.",
+      "type": "select",
+      "default": 7,
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.Remap",
+      "key": "XInput_LT",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": 1,
+          "label": "Button 1"
+        },
+        {
+          "value": 2,
+          "label": "Button 2"
+        },
+        {
+          "value": 3,
+          "label": "Button 3"
+        },
+        {
+          "value": 4,
+          "label": "Button 4"
+        },
+        {
+          "value": 5,
+          "label": "Button 5"
+        },
+        {
+          "value": 6,
+          "label": "Button 6"
+        },
+        {
+          "value": 7,
+          "label": "Button 7"
+        },
+        {
+          "value": 8,
+          "label": "Button 8"
+        },
+        {
+          "value": 9,
+          "label": "Button 9"
+        },
+        {
+          "value": 10,
+          "label": "Button 10"
+        },
+        {
+          "value": 11,
+          "label": "Button 11"
+        },
+        {
+          "value": 12,
+          "label": "Button 12"
+        },
+        {
+          "value": 13,
+          "label": "Button 13"
+        },
+        {
+          "value": 14,
+          "label": "Button 14"
+        },
+        {
+          "value": 15,
+          "label": "Button 15"
+        },
+        {
+          "value": 16,
+          "label": "Button 16"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "input.directInput.rt",
+      "category": "advanced",
+      "label": "DirectInput: Right trigger",
+      "description": "Map this logical button to a 1-based DirectInput button number. Requires DirectInput remapping; native XInput controls are unaffected.",
+      "type": "select",
+      "default": 8,
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.Remap",
+      "key": "XInput_RT",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": 1,
+          "label": "Button 1"
+        },
+        {
+          "value": 2,
+          "label": "Button 2"
+        },
+        {
+          "value": 3,
+          "label": "Button 3"
+        },
+        {
+          "value": 4,
+          "label": "Button 4"
+        },
+        {
+          "value": 5,
+          "label": "Button 5"
+        },
+        {
+          "value": 6,
+          "label": "Button 6"
+        },
+        {
+          "value": 7,
+          "label": "Button 7"
+        },
+        {
+          "value": 8,
+          "label": "Button 8"
+        },
+        {
+          "value": 9,
+          "label": "Button 9"
+        },
+        {
+          "value": 10,
+          "label": "Button 10"
+        },
+        {
+          "value": 11,
+          "label": "Button 11"
+        },
+        {
+          "value": 12,
+          "label": "Button 12"
+        },
+        {
+          "value": 13,
+          "label": "Button 13"
+        },
+        {
+          "value": 14,
+          "label": "Button 14"
+        },
+        {
+          "value": 15,
+          "label": "Button 15"
+        },
+        {
+          "value": 16,
+          "label": "Button 16"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "input.directInput.back",
+      "category": "advanced",
+      "label": "DirectInput: Back / Select",
+      "description": "Map this logical button to a 1-based DirectInput button number. Requires DirectInput remapping; native XInput controls are unaffected.",
+      "type": "select",
+      "default": 9,
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.Remap",
+      "key": "XInput_Back",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": 1,
+          "label": "Button 1"
+        },
+        {
+          "value": 2,
+          "label": "Button 2"
+        },
+        {
+          "value": 3,
+          "label": "Button 3"
+        },
+        {
+          "value": 4,
+          "label": "Button 4"
+        },
+        {
+          "value": 5,
+          "label": "Button 5"
+        },
+        {
+          "value": 6,
+          "label": "Button 6"
+        },
+        {
+          "value": 7,
+          "label": "Button 7"
+        },
+        {
+          "value": 8,
+          "label": "Button 8"
+        },
+        {
+          "value": 9,
+          "label": "Button 9"
+        },
+        {
+          "value": 10,
+          "label": "Button 10"
+        },
+        {
+          "value": 11,
+          "label": "Button 11"
+        },
+        {
+          "value": 12,
+          "label": "Button 12"
+        },
+        {
+          "value": 13,
+          "label": "Button 13"
+        },
+        {
+          "value": 14,
+          "label": "Button 14"
+        },
+        {
+          "value": 15,
+          "label": "Button 15"
+        },
+        {
+          "value": 16,
+          "label": "Button 16"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "input.directInput.start",
+      "category": "advanced",
+      "label": "DirectInput: Start",
+      "description": "Map this logical button to a 1-based DirectInput button number. Requires DirectInput remapping; native XInput controls are unaffected.",
+      "type": "select",
+      "default": 10,
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.Remap",
+      "key": "XInput_Start",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": 1,
+          "label": "Button 1"
+        },
+        {
+          "value": 2,
+          "label": "Button 2"
+        },
+        {
+          "value": 3,
+          "label": "Button 3"
+        },
+        {
+          "value": 4,
+          "label": "Button 4"
+        },
+        {
+          "value": 5,
+          "label": "Button 5"
+        },
+        {
+          "value": 6,
+          "label": "Button 6"
+        },
+        {
+          "value": 7,
+          "label": "Button 7"
+        },
+        {
+          "value": 8,
+          "label": "Button 8"
+        },
+        {
+          "value": 9,
+          "label": "Button 9"
+        },
+        {
+          "value": 10,
+          "label": "Button 10"
+        },
+        {
+          "value": 11,
+          "label": "Button 11"
+        },
+        {
+          "value": 12,
+          "label": "Button 12"
+        },
+        {
+          "value": 13,
+          "label": "Button 13"
+        },
+        {
+          "value": 14,
+          "label": "Button 14"
+        },
+        {
+          "value": 15,
+          "label": "Button 15"
+        },
+        {
+          "value": 16,
+          "label": "Button 16"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "input.directInput.ls",
+      "category": "advanced",
+      "label": "DirectInput: Left stick click",
+      "description": "Map this logical button to a 1-based DirectInput button number. Requires DirectInput remapping; native XInput controls are unaffected.",
+      "type": "select",
+      "default": 11,
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.Remap",
+      "key": "XInput_LS",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": 1,
+          "label": "Button 1"
+        },
+        {
+          "value": 2,
+          "label": "Button 2"
+        },
+        {
+          "value": 3,
+          "label": "Button 3"
+        },
+        {
+          "value": 4,
+          "label": "Button 4"
+        },
+        {
+          "value": 5,
+          "label": "Button 5"
+        },
+        {
+          "value": 6,
+          "label": "Button 6"
+        },
+        {
+          "value": 7,
+          "label": "Button 7"
+        },
+        {
+          "value": 8,
+          "label": "Button 8"
+        },
+        {
+          "value": 9,
+          "label": "Button 9"
+        },
+        {
+          "value": 10,
+          "label": "Button 10"
+        },
+        {
+          "value": 11,
+          "label": "Button 11"
+        },
+        {
+          "value": 12,
+          "label": "Button 12"
+        },
+        {
+          "value": 13,
+          "label": "Button 13"
+        },
+        {
+          "value": 14,
+          "label": "Button 14"
+        },
+        {
+          "value": 15,
+          "label": "Button 15"
+        },
+        {
+          "value": 16,
+          "label": "Button 16"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "input.directInput.rs",
+      "category": "advanced",
+      "label": "DirectInput: Right stick click",
+      "description": "Map this logical button to a 1-based DirectInput button number. Requires DirectInput remapping; native XInput controls are unaffected.",
+      "type": "select",
+      "default": 12,
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.Remap",
+      "key": "XInput_RS",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": 1,
+          "label": "Button 1"
+        },
+        {
+          "value": 2,
+          "label": "Button 2"
+        },
+        {
+          "value": 3,
+          "label": "Button 3"
+        },
+        {
+          "value": 4,
+          "label": "Button 4"
+        },
+        {
+          "value": 5,
+          "label": "Button 5"
+        },
+        {
+          "value": 6,
+          "label": "Button 6"
+        },
+        {
+          "value": 7,
+          "label": "Button 7"
+        },
+        {
+          "value": 8,
+          "label": "Button 8"
+        },
+        {
+          "value": 9,
+          "label": "Button 9"
+        },
+        {
+          "value": 10,
+          "label": "Button 10"
+        },
+        {
+          "value": 11,
+          "label": "Button 11"
+        },
+        {
+          "value": 12,
+          "label": "Button 12"
+        },
+        {
+          "value": 13,
+          "label": "Button 13"
+        },
+        {
+          "value": 14,
+          "label": "Button 14"
+        },
+        {
+          "value": 15,
+          "label": "Button 15"
+        },
+        {
+          "value": 16,
+          "label": "Button 16"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "input.keyboard.speed",
+      "category": "input",
+      "label": "Keyboard: Cycle speed boost",
+      "description": "FFX: cycle through the configured speed multipliers. Use Ctrl, Alt, and Shift joined with a key by +.",
+      "type": "text",
+      "default": "Ctrl+Shift+H",
+      "file": "UnX_Gamepad.ini",
+      "section": "UNX.Keybinds",
+      "key": "CycleSpeedBoost",
+      "restartRequired": true
+    },
+    {
+      "id": "input.keyboard.kickstart",
+      "category": "input",
+      "label": "Keyboard: Fix stuck loading",
+      "description": "Recreate the window size to recover from a stuck loading transition. Use Ctrl, Alt, and Shift joined with a key by +.",
+      "type": "text",
+      "default": "Ctrl+Alt+Shift+K",
+      "file": "UnX_Gamepad.ini",
+      "section": "UNX.Keybinds",
+      "key": "KickStart",
+      "restartRequired": true
+    },
+    {
+      "id": "input.keyboard.timeStop",
+      "category": "input",
+      "label": "Keyboard: Toggle time stop",
+      "description": "FFX: pause or resume game progression. Use Ctrl, Alt, and Shift joined with a key by +.",
+      "type": "text",
+      "default": "Ctrl+Shift+P",
+      "file": "UnX_Gamepad.ini",
+      "section": "UNX.Keybinds",
+      "key": "ToggleTimeStop",
+      "restartRequired": true
+    },
+    {
+      "id": "input.keyboard.freeLook",
+      "category": "input",
+      "label": "Keyboard: Toggle free look",
+      "description": "FFX: toggle the debug camera control flag. Use Ctrl, Alt, and Shift joined with a key by +.",
+      "type": "text",
+      "default": "Ctrl+Shift+F",
+      "file": "UnX_Gamepad.ini",
+      "section": "UNX.Keybinds",
+      "key": "ToggleFreeLook",
+      "restartRequired": true
+    },
+    {
+      "id": "input.keyboard.sensor",
+      "category": "input",
+      "label": "Keyboard: Toggle permanent Sensor",
+      "description": "FFX: enable or disable permanent Sensor. Use Ctrl, Alt, and Shift joined with a key by +.",
+      "type": "text",
+      "default": "Ctrl+Shift+S",
+      "file": "UnX_Gamepad.ini",
+      "section": "UNX.Keybinds",
+      "key": "TogglePermanentSensor",
+      "restartRequired": true
+    },
+    {
+      "id": "input.keyboard.partyAp",
+      "category": "input",
+      "label": "Keyboard: Toggle full party AP",
+      "description": "FFX: enable or disable AP for eligible party members. Use Ctrl, Alt, and Shift joined with a key by +.",
+      "type": "text",
+      "default": "Ctrl+Shift+A",
+      "file": "UnX_Gamepad.ini",
+      "section": "UNX.Keybinds",
+      "key": "ToggleFullPartyAP",
+      "restartRequired": true
+    },
+    {
+      "id": "input.keyboard.vsync",
+      "category": "input",
+      "label": "Keyboard: Toggle VSync",
+      "description": "Switch the presentation interval between VSync off and on. Use Ctrl, Alt, and Shift joined with a key by +.",
+      "type": "text",
+      "default": "Ctrl+Shift+V",
+      "file": "UnX_Gamepad.ini",
+      "section": "UNX.Keybinds",
+      "key": "ToggleVSYNC",
+      "restartRequired": true
+    },
+    {
+      "id": "input.keyboard.softReset",
+      "category": "input",
+      "label": "Keyboard: Soft reset",
+      "description": "FFX: trigger game over in battle or restart the game outside battle. Use Ctrl, Alt, and Shift joined with a key by +.",
+      "type": "text",
+      "default": "Ctrl+Shift+Delete",
+      "file": "UnX_Gamepad.ini",
+      "section": "UNX.Keybinds",
+      "key": "SoftReset",
+      "restartRequired": true
+    },
+    {
+      "id": "input.controller.speed",
+      "category": "input",
+      "label": "Controller: Cycle speed boost",
+      "description": "FFX: cycle through the configured speed multipliers. Join button names with +; Xbox and PlayStation names are accepted. Leave empty to disable.",
+      "type": "text",
+      "default": "Select+L2+Cross",
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.PC",
+      "key": "SpeedBoost",
+      "restartRequired": true
+    },
+    {
+      "id": "input.controller.kickstart",
+      "category": "input",
+      "label": "Controller: Fix stuck loading",
+      "description": "Recover from a stuck loading transition. Join button names with +; Xbox and PlayStation names are accepted. Leave empty to disable.",
+      "type": "text",
+      "default": "L1+L2+Up",
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.PC",
+      "key": "KickStart",
+      "restartRequired": true
+    },
+    {
+      "id": "input.controller.f1",
+      "category": "input",
+      "label": "Controller: Send F1",
+      "description": "Send the game's built-in F1 booster key. Join button names with +; Xbox and PlayStation names are accepted. Leave empty to disable.",
+      "type": "text",
+      "default": "Select+Cross",
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.PC",
+      "key": "F1",
+      "restartRequired": true
+    },
+    {
+      "id": "input.controller.f2",
+      "category": "input",
+      "label": "Controller: Send F2",
+      "description": "Send the game's built-in F2 booster key. Join button names with +; Xbox and PlayStation names are accepted. Leave empty to disable.",
+      "type": "text",
+      "default": "Select+Circle",
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.PC",
+      "key": "F2",
+      "restartRequired": true
+    },
+    {
+      "id": "input.controller.f3",
+      "category": "input",
+      "label": "Controller: Send F3",
+      "description": "Send the game's built-in F3 booster key. Join button names with +; Xbox and PlayStation names are accepted. Leave empty to disable.",
+      "type": "text",
+      "default": "Select+Square",
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.PC",
+      "key": "F3",
+      "restartRequired": true
+    },
+    {
+      "id": "input.controller.f4",
+      "category": "input",
+      "label": "Controller: Send F4",
+      "description": "Send the game's built-in F4 booster key. Join button names with +; Xbox and PlayStation names are accepted. Leave empty to disable.",
+      "type": "text",
+      "default": "Select+L1",
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.PC",
+      "key": "F4",
+      "restartRequired": true
+    },
+    {
+      "id": "input.controller.f5",
+      "category": "input",
+      "label": "Controller: Send F5",
+      "description": "Send the game's built-in F5 booster key. Join button names with +; Xbox and PlayStation names are accepted. Leave empty to disable.",
+      "type": "text",
+      "default": "Select+R1",
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.PC",
+      "key": "F5",
+      "restartRequired": true
+    },
+    {
+      "id": "input.controller.escape",
+      "category": "input",
+      "label": "Controller: Escape",
+      "description": "Send Escape to open or dismiss game menus. Join button names with +; Xbox and PlayStation names are accepted. Leave empty to disable.",
+      "type": "text",
+      "default": "L2+R2+Select",
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.PC",
+      "key": "ESC",
+      "restartRequired": true
+    },
+    {
+      "id": "input.controller.fullscreen",
+      "category": "input",
+      "label": "Controller: Toggle fullscreen",
+      "description": "Send Alt+Enter to switch window mode. Join button names with +; Xbox and PlayStation names are accepted. Leave empty to disable.",
+      "type": "text",
+      "default": "L2+L3",
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.PC",
+      "key": "Fullscreen",
+      "restartRequired": true
+    },
+    {
+      "id": "input.controller.softReset",
+      "category": "input",
+      "label": "Controller: Soft reset",
+      "description": "FFX: trigger game over in battle or restart outside battle. Join button names with +; Xbox and PlayStation names are accepted. Leave empty to disable.",
+      "type": "text",
+      "default": "L1+L2+R1+R2+Select+Start",
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.PC",
+      "key": "SoftReset",
+      "restartRequired": true
+    },
+    {
+      "id": "input.controller.screenshot",
+      "category": "input",
+      "label": "Controller: Steam screenshot",
+      "description": "Capture a screenshot through Steam. Join button names with +; Xbox and PlayStation names are accepted. Leave empty to disable.",
+      "type": "text",
+      "default": "Select+R3",
+      "file": "UnX_Gamepad.ini",
+      "section": "Gamepad.Steam",
+      "key": "Screenshot",
+      "restartRequired": true
+    },
+    {
+      "id": "display.disableDpiScaling",
+      "category": "display",
+      "label": "Disable Windows DPI scaling",
+      "description": "Let UnX request DPI-aware rendering to avoid Windows scaling the game window.",
+      "type": "boolean",
+      "default": true,
+      "file": "UnX.ini",
+      "section": "UnX.Display",
+      "key": "DisableDPIScaling",
+      "restartRequired": true
+    },
+    {
+      "id": "advanced.bypassIntel",
+      "category": "advanced",
+      "label": "Bypass Intel adapter",
+      "description": "Legacy adapter-selection override. Keep disabled unless an Intel adapter prevents the game from selecting its dedicated GPU.",
+      "type": "boolean",
+      "default": false,
+      "file": "UnX.ini",
+      "section": "UnX.Render",
+      "key": "BypassIntel",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "textures.resourceRoot",
+      "category": "textures",
+      "label": "Texture resource folder",
+      "description": "Folder containing gamepads, injected textures, and other UnX resources. Relative paths are resolved from the game folder.",
+      "type": "text",
+      "default": "UnX_Res",
+      "file": "UnX.ini",
+      "section": "UnX.Textures",
+      "key": "ResourceRoot",
+      "restartRequired": true
+    },
+    {
+      "id": "textures.inject",
+      "category": "textures",
+      "label": "Enable texture replacement",
+      "description": "Load replacement textures, including controller icon packs.",
+      "type": "boolean",
+      "default": true,
+      "file": "UnX.ini",
+      "section": "UnX.Textures",
+      "key": "Inject",
+      "restartRequired": true
+    },
+    {
+      "id": "textures.cache",
+      "category": "textures",
+      "label": "Cache textures",
+      "description": "Reuse textures managed by the legacy Special K texture cache.",
+      "type": "boolean",
+      "default": true,
+      "file": "UnX.ini",
+      "section": "UnX.Textures",
+      "key": "Cache",
+      "restartRequired": true
+    },
+    {
+      "id": "textures.dump",
+      "category": "textures",
+      "label": "Dump textures",
+      "description": "Write discovered game textures to the resource folder for mod development.",
+      "type": "boolean",
+      "default": false,
+      "file": "UnX.ini",
+      "section": "UnX.Textures",
+      "key": "Dump",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.window.borderless",
+      "category": "display",
+      "label": "Borderless window",
+      "description": "Remove borders from the game window.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Window.System",
+      "key": "Borderless",
+      "restartRequired": true
+    },
+    {
+      "id": "sk.window.fillScreen",
+      "category": "display",
+      "label": "Fill screen",
+      "description": "Scale the borderless window to fill the monitor. This is a maximized window, not exclusive fullscreen.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Window.System",
+      "key": "Fullscreen",
+      "restartRequired": true
+    },
+    {
+      "id": "sk.window.center",
+      "category": "display",
+      "label": "Center window",
+      "description": "Center the game window on its monitor.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Window.System",
+      "key": "Center",
+      "restartRequired": true
+    },
+    {
+      "id": "sk.window.renderInBackground",
+      "category": "display",
+      "label": "Render in background",
+      "description": "Continue rendering while another application has focus.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Window.System",
+      "key": "RenderInBackground",
+      "restartRequired": true
+    },
+    {
+      "id": "sk.window.muteInBackground",
+      "category": "display",
+      "label": "Mute in background",
+      "description": "Mute game audio while another application has focus.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Window.System",
+      "key": "MuteInBackground",
+      "restartRequired": true
+    },
+    {
+      "id": "sk.window.rememberPosition",
+      "category": "display",
+      "label": "Remember window position",
+      "description": "Keep the window position after dragging it.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Window.System",
+      "key": "PersistentDragPos",
+      "restartRequired": true
+    },
+    {
+      "id": "sk.window.fixMouseCoords",
+      "category": "display",
+      "label": "Correct resized mouse coordinates",
+      "description": "Adjust mouse coordinates after resizing the game window.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Window.System",
+      "key": "FixMouseCoords",
+      "restartRequired": true
+    },
+    {
+      "id": "sk.window.preventScreensaver",
+      "category": "display",
+      "label": "Prevent screensaver",
+      "description": "Prevent the Windows screensaver while the game is running.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Window.System",
+      "key": "DisableScreensaver",
+      "restartRequired": true
+    },
+    {
+      "id": "sk.window.overrideResolution",
+      "category": "display",
+      "label": "Window resolution override",
+      "description": "Client size in WIDTHxHEIGHT form. Use 0x0 to let the game choose.",
+      "type": "text",
+      "default": "0x0",
+      "file": "dxgi.ini",
+      "section": "Window.System",
+      "key": "OverrideRes",
+      "restartRequired": true
+    },
+    {
+      "id": "sk.window.offsetX",
+      "category": "advanced",
+      "label": "X window offset",
+      "description": "Window position offset in pixels, or a percentage ending in %.",
+      "type": "text",
+      "default": "0.0%",
+      "file": "dxgi.ini",
+      "section": "Window.System",
+      "key": "XOffset",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.window.offsetY",
+      "category": "advanced",
+      "label": "Y window offset",
+      "description": "Window position offset in pixels, or a percentage ending in %.",
+      "type": "text",
+      "default": "0.0%",
+      "file": "dxgi.ini",
+      "section": "Window.System",
+      "key": "YOffset",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.window.alwaysOnTop",
+      "category": "display",
+      "label": "Always on top",
+      "description": "Control whether the game window stays above other windows.",
+      "type": "select",
+      "default": 0,
+      "file": "dxgi.ini",
+      "section": "Window.System",
+      "key": "AlwaysOnTop",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": -1,
+          "label": "Let the game decide"
+        },
+        {
+          "value": 0,
+          "label": "Off"
+        },
+        {
+          "value": 1,
+          "label": "On"
+        }
+      ]
+    },
+    {
+      "id": "sk.window.confineCursor",
+      "category": "input",
+      "label": "Confine cursor",
+      "description": "Keep the mouse pointer inside the game window.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Window.System",
+      "key": "ConfineCursor",
+      "restartRequired": true
+    },
+    {
+      "id": "sk.window.unconfineCursor",
+      "category": "input",
+      "label": "Release cursor",
+      "description": "Prevent the game from restricting the mouse pointer. Leave disabled when confining the cursor.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Window.System",
+      "key": "UnconfineCursor",
+      "restartRequired": true
+    },
+    {
+      "id": "sk.display.forceFullscreen",
+      "category": "display",
+      "label": "Force exclusive fullscreen",
+      "description": "Request exclusive fullscreen through DXGI. Leave disabled when forcing windowed mode.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Display.Output",
+      "key": "ForceFullscreen",
+      "restartRequired": true
+    },
+    {
+      "id": "sk.display.forceWindowed",
+      "category": "display",
+      "label": "Force windowed mode",
+      "description": "Request windowed presentation through DXGI. Leave disabled when forcing exclusive fullscreen.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Display.Output",
+      "key": "ForceWindowed",
+      "restartRequired": true
+    },
+    {
+      "id": "sk.framerate.target",
+      "category": "display",
+      "label": "Frame rate limit",
+      "description": "Special K frame limiter. Use 0 to disable this extra limiter; the game retains its own timing.",
+      "type": "number",
+      "default": 0,
+      "file": "dxgi.ini",
+      "section": "Render.FrameRate",
+      "key": "TargetFPS",
+      "restartRequired": true,
+      "min": 0,
+      "max": 240,
+      "step": 1
+    },
+    {
+      "id": "sk.framerate.vsync",
+      "category": "display",
+      "label": "VSync",
+      "description": "Choose the DXGI presentation interval. Higher intervals wait additional refresh cycles.",
+      "type": "select",
+      "default": 0,
+      "file": "dxgi.ini",
+      "section": "Render.FrameRate",
+      "key": "PresentationInterval",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": -1,
+          "label": "Game default"
+        },
+        {
+          "value": 0,
+          "label": "Off"
+        },
+        {
+          "value": 1,
+          "label": "On"
+        },
+        {
+          "value": 2,
+          "label": "Every 2 refreshes"
+        },
+        {
+          "value": 3,
+          "label": "Every 3 refreshes"
+        },
+        {
+          "value": 4,
+          "label": "Every 4 refreshes"
+        }
+      ]
+    },
+    {
+      "id": "sk.framerate.backBuffers",
+      "category": "advanced",
+      "label": "Back buffer count",
+      "description": "Override the swapchain back buffer count. Flip-discard presentation requires at least two buffers.",
+      "type": "select",
+      "default": 4,
+      "file": "dxgi.ini",
+      "section": "Render.FrameRate",
+      "key": "BackBufferCount",
+      "restartRequired": true,
+      "advanced": true,
+      "options": [
+        {
+          "value": -1,
+          "label": "Game default"
+        },
+        {
+          "value": 1,
+          "label": "1"
+        },
+        {
+          "value": 2,
+          "label": "2"
+        },
+        {
+          "value": 3,
+          "label": "3"
+        },
+        {
+          "value": 4,
+          "label": "4"
+        },
+        {
+          "value": 5,
+          "label": "5"
+        },
+        {
+          "value": 6,
+          "label": "6"
+        },
+        {
+          "value": 7,
+          "label": "7"
+        },
+        {
+          "value": 8,
+          "label": "8"
+        }
+      ]
+    },
+    {
+      "id": "sk.framerate.preRender",
+      "category": "advanced",
+      "label": "Frames rendered ahead",
+      "description": "Limit queued frames. Use -1 to leave the game setting unchanged, or 0 for the DXGI default.",
+      "type": "number",
+      "default": 4,
+      "file": "dxgi.ini",
+      "section": "Render.FrameRate",
+      "key": "PreRenderLimit",
+      "restartRequired": true,
+      "min": -1,
+      "max": 16,
+      "step": 1,
+      "advanced": true
+    },
+    {
+      "id": "sk.framerate.refreshRate",
+      "category": "advanced",
+      "label": "Fullscreen refresh rate",
+      "description": "Refresh rate in Hz. Use -1 to leave it to the game.",
+      "type": "number",
+      "default": -1,
+      "file": "dxgi.ini",
+      "section": "Render.FrameRate",
+      "key": "RefreshRate",
+      "restartRequired": true,
+      "min": -1,
+      "max": 360,
+      "step": 1,
+      "advanced": true
+    },
+    {
+      "id": "sk.framerate.waitForVblank",
+      "category": "advanced",
+      "label": "Wait for vertical blank",
+      "description": "Make the legacy frame limiter wait for vertical blank.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Render.FrameRate",
+      "key": "WaitForVBLANK",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.framerate.sleeplessRender",
+      "category": "advanced",
+      "label": "Keep render thread awake",
+      "description": "Prevent sleeping on the render thread. This changes CPU scheduling.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Render.FrameRate",
+      "key": "SleeplessRenderThread",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.framerate.sleeplessWindow",
+      "category": "advanced",
+      "label": "Keep window thread awake",
+      "description": "Prevent sleeping on the window thread. This changes CPU scheduling.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Render.FrameRate",
+      "key": "SleeplessWindowThread",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.dxgi.flipDiscard",
+      "category": "advanced",
+      "label": "Use flip discard",
+      "description": "Use the Windows flip-discard swapchain presentation path when available.",
+      "type": "boolean",
+      "default": true,
+      "file": "dxgi.ini",
+      "section": "Render.DXGI",
+      "key": "UseFlipDiscard",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.dxgi.safeFullscreen",
+      "category": "advanced",
+      "label": "Safe fullscreen handling",
+      "description": "Enable the legacy engine's fullscreen transition compatibility handling.",
+      "type": "boolean",
+      "default": true,
+      "file": "dxgi.ini",
+      "section": "Render.DXGI",
+      "key": "SafeFullscreenMode",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.dxgi.allowTearing",
+      "category": "advanced",
+      "label": "Allow DWM tearing",
+      "description": "Allow tearing through the legacy desktop composition path.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Render.DXGI",
+      "key": "AllowTearingInDWM",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.dxgi.enhancedDepth",
+      "category": "advanced",
+      "label": "64-bit depth-stencil surfaces",
+      "description": "Replace depth-stencil allocations with the legacy enhanced-depth format.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Render.DXGI",
+      "key": "Use64BitDepthStencil",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.dxgi.rehookPresent",
+      "category": "advanced",
+      "label": "Rehook presentation",
+      "description": "Restore the presentation hook if another overlay changes it.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Render.DXGI",
+      "key": "RehookPresent",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.dxgi.scaling",
+      "category": "display",
+      "label": "Display scaling",
+      "description": "Choose the DXGI scaling preference.",
+      "type": "select",
+      "default": "DontCare",
+      "file": "dxgi.ini",
+      "section": "Render.DXGI",
+      "key": "Scaling",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": "DontCare",
+          "label": "Game default"
+        },
+        {
+          "value": "Centered",
+          "label": "Centered"
+        },
+        {
+          "value": "Stretched",
+          "label": "Stretched"
+        },
+        {
+          "value": "Unspecified",
+          "label": "Unspecified"
+        }
+      ]
+    },
+    {
+      "id": "sk.dxgi.swapchainWait",
+      "category": "advanced",
+      "label": "Swapchain wait",
+      "description": "Legacy swapchain wait time in milliseconds. Use 0 to disable.",
+      "type": "number",
+      "default": 0,
+      "file": "dxgi.ini",
+      "section": "Render.DXGI",
+      "key": "SwapChainWait",
+      "restartRequired": true,
+      "min": 0,
+      "max": 1000,
+      "step": 1,
+      "advanced": true
+    },
+    {
+      "id": "sk.dxgi.minResolution",
+      "category": "advanced",
+      "label": "Minimum reported resolution",
+      "description": "Filter reported display modes with WIDTHxHEIGHT. Use 0x0 for no constraint.",
+      "type": "text",
+      "default": "0x0",
+      "file": "dxgi.ini",
+      "section": "Render.DXGI",
+      "key": "MinRes",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.dxgi.maxResolution",
+      "category": "advanced",
+      "label": "Maximum reported resolution",
+      "description": "Filter reported display modes with WIDTHxHEIGHT. Use 0x0 for no constraint.",
+      "type": "text",
+      "default": "0x0",
+      "file": "dxgi.ini",
+      "section": "Render.DXGI",
+      "key": "MaxRes",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.dxgi.exceptionMode",
+      "category": "advanced",
+      "label": "D3D11 exception mode",
+      "description": "Choose the legacy engine's D3D11 exception handling preference.",
+      "type": "select",
+      "default": "DontCare",
+      "file": "dxgi.ini",
+      "section": "Render.DXGI",
+      "key": "ExceptionMode",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": "DontCare",
+          "label": "Game default"
+        },
+        {
+          "value": "Raise",
+          "label": "Raise exceptions"
+        },
+        {
+          "value": "Ignore",
+          "label": "Ignore exceptions"
+        }
+      ],
+      "advanced": true
+    },
+    {
+      "id": "sk.textures.maxEntries",
+      "category": "textures",
+      "label": "Maximum cached textures",
+      "description": "Upper target for the number of cached textures.",
+      "type": "number",
+      "default": 8192,
+      "file": "dxgi.ini",
+      "section": "Textures.Cache",
+      "key": "MaxEntries",
+      "restartRequired": true,
+      "min": 128,
+      "max": 65536,
+      "step": 1,
+      "advanced": true
+    },
+    {
+      "id": "sk.textures.minEntries",
+      "category": "textures",
+      "label": "Minimum cached textures",
+      "description": "Minimum number of textures to retain while evicting cache entries.",
+      "type": "number",
+      "default": 128,
+      "file": "dxgi.ini",
+      "section": "Textures.Cache",
+      "key": "MinEntries",
+      "restartRequired": true,
+      "min": 0,
+      "max": 65536,
+      "step": 1,
+      "advanced": true
+    },
+    {
+      "id": "sk.textures.maxMemory",
+      "category": "textures",
+      "label": "Maximum texture cache (MiB)",
+      "description": "Upper memory target for the legacy texture cache.",
+      "type": "number",
+      "default": 2048,
+      "file": "dxgi.ini",
+      "section": "Textures.Cache",
+      "key": "MaxSizeInMiB",
+      "restartRequired": true,
+      "min": 64,
+      "max": 16384,
+      "step": 1,
+      "advanced": true
+    },
+    {
+      "id": "sk.textures.minMemory",
+      "category": "textures",
+      "label": "Minimum texture cache (MiB)",
+      "description": "Minimum memory target while trimming the texture cache.",
+      "type": "number",
+      "default": 384,
+      "file": "dxgi.ini",
+      "section": "Textures.Cache",
+      "key": "MinSizeInMiB",
+      "restartRequired": true,
+      "min": 0,
+      "max": 16384,
+      "step": 1,
+      "advanced": true
+    },
+    {
+      "id": "sk.textures.maxEvict",
+      "category": "textures",
+      "label": "Maximum eviction batch",
+      "description": "Maximum textures removed during a cache eviction batch.",
+      "type": "number",
+      "default": 256,
+      "file": "dxgi.ini",
+      "section": "Textures.Cache",
+      "key": "MaxEvict",
+      "restartRequired": true,
+      "min": 1,
+      "max": 65536,
+      "step": 1,
+      "advanced": true
+    },
+    {
+      "id": "sk.textures.minEvict",
+      "category": "textures",
+      "label": "Minimum eviction batch",
+      "description": "Minimum textures removed during a cache eviction batch.",
+      "type": "number",
+      "default": 32,
+      "file": "dxgi.ini",
+      "section": "Textures.Cache",
+      "key": "MinEvict",
+      "restartRequired": true,
+      "min": 1,
+      "max": 65536,
+      "step": 1,
+      "advanced": true
+    },
+    {
+      "id": "sk.textures.ignoreNonMipmapped",
+      "category": "textures",
+      "label": "Ignore textures without mipmaps",
+      "description": "Skip non-mipmapped textures in the legacy cache.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Textures.Cache",
+      "key": "IgnoreNonMipmapped",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.textures.allowStaging",
+      "category": "textures",
+      "label": "Process staging textures",
+      "description": "Allow caching, dumping, and replacement of staging textures.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Textures.Cache",
+      "key": "AllowStaging",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.textures.preciseHash",
+      "category": "textures",
+      "label": "Precise texture hashes",
+      "description": "Use the legacy engine's precise texture hashing path. Existing replacement packs may depend on the original hashing mode.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Textures.D3D11",
+      "key": "PreciseHash",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.textures.keepFormat",
+      "category": "textures",
+      "label": "Keep injected texture format",
+      "description": "Preserve the expected texture format during replacement.",
+      "type": "boolean",
+      "default": true,
+      "file": "dxgi.ini",
+      "section": "Textures.D3D11",
+      "key": "InjectionKeepsFormat",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.textures.generateMipmaps",
+      "category": "textures",
+      "label": "Generate texture mipmaps",
+      "description": "Create missing mip levels when loading replacement textures.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Textures.D3D11",
+      "key": "GenerateMipmaps",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.textures.dumpFirstLoad",
+      "category": "textures",
+      "label": "Dump textures on first load",
+      "description": "Dump textures when the legacy engine first loads them.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Textures.General",
+      "key": "DumpOnFirstLoad",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.input.xinputEnabled",
+      "category": "input",
+      "label": "Enable XInput integration",
+      "description": "Keep enabled for UnX controller shortcuts and Special K controller navigation.",
+      "type": "boolean",
+      "default": true,
+      "file": "dxgi.ini",
+      "section": "Input.XInput",
+      "key": "Enable",
+      "restartRequired": true,
+      "advanced": false
+    },
+    {
+      "id": "sk.input.xinputRehook",
+      "category": "input",
+      "label": "Rehook XInput",
+      "description": "Reinstall XInput hooks if another input layer changes them.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Input.XInput",
+      "key": "Rehook",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.input.disablePs4Hid",
+      "category": "input",
+      "label": "Disable PS4 HID input",
+      "description": "Disable the native PS4 HID path to avoid duplicate input when another layer provides XInput.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Input.Gamepad",
+      "key": "DisablePS4HID",
+      "restartRequired": true,
+      "advanced": false
+    },
+    {
+      "id": "sk.input.hapticUi",
+      "category": "input",
+      "label": "Controller feedback in mod menus",
+      "description": "Enable vibration feedback while navigating Special K menus.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Input.Gamepad",
+      "key": "AllowHapticUI",
+      "restartRequired": true,
+      "advanced": false
+    },
+    {
+      "id": "sk.input.disableRumble",
+      "category": "input",
+      "label": "Disable controller vibration",
+      "description": "Disable rumble across the input APIs managed by the legacy Special K engine.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Input.Gamepad",
+      "key": "DisableRumble",
+      "restartRequired": true,
+      "advanced": false
+    },
+    {
+      "id": "sk.input.directInputEnabled",
+      "category": "input",
+      "label": "Enable Special K DirectInput hooks",
+      "description": "Keep enabled for UnX DirectInput remapping and keyboard state handling.",
+      "type": "boolean",
+      "default": true,
+      "file": "dxgi.ini",
+      "section": "Input.Gamepad",
+      "key": "EnableDirectInput8",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.input.hidEnabled",
+      "category": "input",
+      "label": "Enable Special K HID hooks",
+      "description": "Enable HID input integration in the legacy engine.",
+      "type": "boolean",
+      "default": true,
+      "file": "dxgi.ini",
+      "section": "Input.Gamepad",
+      "key": "EnableHID",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.input.uiSlot",
+      "category": "input",
+      "label": "Mod menu controller",
+      "description": "XInput controller slot that navigates the Special K menu.",
+      "type": "select",
+      "default": 0,
+      "file": "dxgi.ini",
+      "section": "Input.XInput",
+      "key": "UISlot",
+      "restartRequired": true,
+      "options": [
+        {
+          "value": 0,
+          "label": "Controller 1 (slot 0)"
+        },
+        {
+          "value": 1,
+          "label": "Controller 2 (slot 1)"
+        },
+        {
+          "value": 2,
+          "label": "Controller 3 (slot 2)"
+        },
+        {
+          "value": 3,
+          "label": "Controller 4 (slot 3)"
+        },
+        {
+          "value": 4,
+          "label": "None"
+        }
+      ]
+    },
+    {
+      "id": "sk.input.placeholders",
+      "category": "advanced",
+      "label": "XInput placeholder mask",
+      "description": "Bit mask for virtual connected slots: 1, 2, 4, and 8 represent controller slots 0 through 3. Use 0 for none.",
+      "type": "number",
+      "default": 0,
+      "file": "dxgi.ini",
+      "section": "Input.XInput",
+      "key": "PlaceholderMask",
+      "restartRequired": true,
+      "min": 0,
+      "max": 15,
+      "step": 1,
+      "advanced": true
+    },
+    {
+      "id": "sk.input.slotReassignment",
+      "category": "advanced",
+      "label": "XInput slot order",
+      "description": "Four comma-separated controller slot numbers, such as 0,1,2,3. Applies before UnX controller polling.",
+      "type": "text",
+      "default": "0,1,2,3",
+      "file": "dxgi.ini",
+      "section": "Input.XInput",
+      "key": "SlotReassignment",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.cursor.manage",
+      "category": "input",
+      "label": "Automatically manage cursor",
+      "description": "Let Special K hide the mouse cursor after inactivity.",
+      "type": "boolean",
+      "default": true,
+      "file": "dxgi.ini",
+      "section": "Input.Cursor",
+      "key": "Manage",
+      "restartRequired": true
+    },
+    {
+      "id": "sk.cursor.keyboardActivates",
+      "category": "input",
+      "label": "Keyboard shows cursor",
+      "description": "Show the cursor when keyboard input is detected.",
+      "type": "boolean",
+      "default": false,
+      "file": "dxgi.ini",
+      "section": "Input.Cursor",
+      "key": "KeyboardActivates",
+      "restartRequired": true
+    },
+    {
+      "id": "sk.cursor.timeout",
+      "category": "input",
+      "label": "Cursor inactivity timeout",
+      "description": "Seconds before hiding the cursor. Use 0 to keep the game cursor hidden while automatic management is enabled.",
+      "type": "number",
+      "default": 0,
+      "file": "dxgi.ini",
+      "section": "Input.Cursor",
+      "key": "Timeout",
+      "restartRequired": true,
+      "min": 0,
+      "max": 60,
+      "step": 0.1
+    },
+    {
+      "id": "sk.system.crashHandler",
+      "category": "advanced",
+      "label": "Enable crash logs",
+      "description": "Use Special K's custom crash handler and crash log collection.",
+      "type": "boolean",
+      "default": true,
+      "file": "dxgi.ini",
+      "section": "SpecialK.System",
+      "key": "UseCrashHandler",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.system.logLevel",
+      "category": "advanced",
+      "label": "Log detail",
+      "description": "Diagnostic log verbosity, from general messages to detailed debugging.",
+      "type": "number",
+      "default": 0,
+      "file": "dxgi.ini",
+      "section": "SpecialK.System",
+      "key": "LogLevel",
+      "restartRequired": true,
+      "advanced": true,
+      "min": 0,
+      "max": 5,
+      "step": 1
+    },
+    {
+      "id": "sk.system.traceLibraries",
+      "category": "advanced",
+      "label": "Trace loaded libraries",
+      "description": "Record DLL loading and enable legacy dynamic API detection.",
+      "type": "boolean",
+      "default": true,
+      "file": "dxgi.ini",
+      "section": "SpecialK.System",
+      "key": "TraceLoadLibrary",
+      "restartRequired": true,
+      "advanced": true
+    },
+    {
+      "id": "sk.system.initDelay",
+      "category": "advanced",
+      "label": "Initialization delay",
+      "description": "Delay before legacy Special K initialization, in milliseconds.",
+      "type": "number",
+      "default": 250,
+      "file": "dxgi.ini",
+      "section": "SpecialK.System",
+      "key": "InitDelay",
+      "restartRequired": true,
+      "advanced": true,
+      "min": 0,
+      "max": 10000,
+      "step": 50
+    }
+  ]
+}

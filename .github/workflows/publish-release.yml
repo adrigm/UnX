@@ -1,0 +1,33 @@
+name: Publish the reviewed UnX 0.10.0 release
+
+on:
+  push:
+    branches:
+      - fix/steam-25501027-speed
+    paths:
+      - docs/publish-release.json
+
+permissions: {}
+
+concurrency:
+  group: publish-unx-v0.10.0
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Verify the tested build and publish its immutable assets
+    if: github.repository == 'adrigm/UnX' && github.ref == 'refs/heads/fix/steam-25501027-speed'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate the approved bytes, stage a draft, then publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/publish-release.py --request docs/publish-release.json

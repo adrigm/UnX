@@ -1,0 +1,57 @@
+name: Check SteamOS test setup
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'fix/**'
+      - 'feature/**'
+    paths:
+      - 'scripts/steamos-test-setup.sh'
+      - '.github/workflows/check-steamos-handoff.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    name: Validate user-local Linux setup and rerun
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Choose a writable user workspace
+        run: printf 'UNX_TEST_ROOT=%s/unx-steamos-setup\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+      - name: Check shell syntax and usage
+        run: |
+          bash -n scripts/steamos-test-setup.sh
+          bash scripts/steamos-test-setup.sh --help
+          if grep -q $'\r' scripts/steamos-test-setup.sh; then
+            echo 'The Linux script must use LF line endings.'
+            exit 1
+          fi
+      - name: Exercise real verified downloads and portable tools
+        run: |
+          bash scripts/steamos-test-setup.sh --dev-tools --github-cli
+          source "$UNX_TEST_ROOT/unx-test-env.sh"
+          node --version
+          npm --version
+          gh --version
+          test "$UNX_TEST_COMMIT" = '42f0a508108a981d19146ce61e3b86d08e68ca32'
+          test -f "$UNX_TEST_SOURCE/launcher/package-lock.json"
+      - name: Verify reruns preserve source edits and evidence
+        run: |
+          source "$UNX_TEST_ROOT/unx-test-env.sh"
+          printf 'preserve-source\n' > "$UNX_TEST_SOURCE/.bootstrap-test-marker"
+          printf 'preserve-results\n' > "$UNX_TEST_RESULTS/bootstrap-test-marker.txt"
+          bash scripts/steamos-test-setup.sh --dev-tools --github-cli
+          grep -qx 'preserve-source' "$UNX_TEST_SOURCE/.bootstrap-test-marker"
+          grep -qx 'preserve-results' "$UNX_TEST_RESULTS/bootstrap-test-marker.txt"
+      - name: Run the documented tests without Electron postinstall
+        run: |
+          source "$UNX_TEST_ROOT/unx-test-env.sh"
+          cd "$UNX_TEST_SOURCE/launcher"
+          npm ci --ignore-scripts
+          npm test

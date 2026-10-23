@@ -235,3 +235,8 @@ _Pvt_Extensions
 # FAKE - F# Make
 .fake/
 /UnX.VC.db
+
+# Generated manager runtime and native packages
+/launcher/payload/
+/launcher/assets/unx.png
+/launcher/assets/unx.ico

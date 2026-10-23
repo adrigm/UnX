@@ -26,9 +26,14 @@
 #include "window.h"
 #include "hook.h"
 #include "log.h"
+#include "game_memory.h"
+#include "game_signatures.h"
 
 #include <Windows.h>
 #include <cstdint>
+#include <atomic>
+#include <float.h>
+#include <vector>
 
 extern wchar_t* UNX_GetExecutableName (void);
        void     UNX_SetSensor         (bool state);
@@ -37,13 +42,6 @@ unx_gametype_t game_type = GAME_INVALID;
 
 
 struct unx_ffx2_memory_s {
-  struct {
-    enum offset_t {
-      Debug      = 0x9F78B8,
-      PartyStats = 0xA016C0
-    };
-  } offsets;
-
   struct debug_s {
     struct {
       uint8_t allies;           // 0x9F78B8
@@ -343,8 +341,8 @@ UNX_SuspendAllOtherThreads (void)
 
             if (hThread != nullptr)
             {
-              threads.push  (tent.th32ThreadID);
-              SuspendThread (hThread);
+              if (SuspendThread (hThread) != static_cast <DWORD> (-1))
+                threads.push (tent.th32ThreadID);
               CloseHandle   (hThread);
             }
           }
@@ -382,105 +380,384 @@ UNX_ResumeThreads (std::queue <DWORD> threads)
 
 
 #include "log.h"
-float __UNX_speed_mod      = 1.0f;
-bool  __UNX_skip_cutscenes = false;
+std::atomic <float> __UNX_speed_mod (1.0f);
+std::atomic <bool>  __UNX_skip_cutscenes (false);
 
 extern LPVOID __UNX_base_img_addr;
-
-void
-UNX_FFX_AudioSkip (bool bSkip)
-{
-  static intptr_t pFMODSyncAddr = (intptr_t)((uint8_t *)__UNX_base_img_addr + 0x30AEC0);
-  static uint8_t  orig_inst []  = { 0x55, 0x00, 0x00, 0x00 };
-
-  static volatile ULONG              __init      = FALSE;
-  if (! InterlockedCompareExchange (&__init, TRUE, FALSE))
-  {
-    memcpy (orig_inst, (char *)pFMODSyncAddr, 3);
-  }
-
-  DWORD dwProtect;
-
-  std::queue <DWORD> tids =
-    UNX_SuspendAllOtherThreads ();
-
-  VirtualProtect ((LPVOID)pFMODSyncAddr, 3, PAGE_READWRITE, &dwProtect);
-
-  if (bSkip)
-  {
-    const uint8_t skip_inst [] = { 0xc2, 0x08, 0x00, 0x00 };
-    memcpy ((void *)pFMODSyncAddr, skip_inst, 3);
-    //SK_GetCommandProcessor ()->ProcessCommandFormatted ("mem t %p %s", pFMODSyncAddr, skip_inst);
-  } else {
-    memcpy ((void *)pFMODSyncAddr, orig_inst, 3);
-    //SK_GetCommandProcessor ()->ProcessCommandFormatted ("mem t %p %s", pFMODSyncAddr, orig_inst);
-  }
-
-  __UNX_skip_cutscenes = bSkip;
-
-  VirtualProtect ((LPVOID)pFMODSyncAddr, 3, dwProtect, &dwProtect);
-
-  UNX_ResumeThreads (tids);
-}
 
 using FFX_GameTick_pfn          = void (__cdecl *)(float);
       FFX_GameTick_pfn
       UNX_FFX_GameTick_Original = nullptr;
 
+void __cdecl UNX_FFX_GameTick (float fSpeed);
+
+namespace {
+
+SRWLOCK speed_lock = SRWLOCK_INIT;
+
+struct speed_lock_guard {
+  speed_lock_guard  () { AcquireSRWLockExclusive (&speed_lock); }
+  ~speed_lock_guard () { ReleaseSRWLockExclusive (&speed_lock); }
+};
+
+struct ffx_speed_targets_s {
+  uint8_t* tick = nullptr;
+  uint8_t* audio = nullptr;
+  uint8_t  audio_original [3] = { };
+  bool     hook_created = false;
+  bool     hook_enabled = false;
+} speed_targets;
+
+using FFX_Menu_pfn = int (__cdecl *)(int);
+struct {
+  FFX_Menu_pfn menu = nullptr;
+  uint8_t* timestop = nullptr;
+  uint8_t* kill_branch = nullptr;
+  uint8_t* ffx2_death = nullptr;
+} cheat_targets;
+
+using namespace unx::game_signatures;
+const uint8_t skip_audio [] = { 0xc2, 0x08, 0x00 };
+
+// Keep thread handles until they are resumed. Do all vector allocation before
+// suspending anything: a stopped thread could otherwise own the CRT heap lock.
+class audio_thread_pause {
+  struct thread_s { HANDLE handle; bool suspended; };
+  std::vector <thread_s> threads;
+
+public:
+  bool safe = false;
+
+  explicit audio_thread_pause (const uint8_t* patch)
+  {
+    HANDLE snapshot = CreateToolhelp32Snapshot (TH32CS_SNAPTHREAD, 0);
+    if (snapshot == INVALID_HANDLE_VALUE)
+      return;
+
+    THREADENTRY32 entry = { };
+    entry.dwSize = sizeof entry;
+    bool complete = Thread32First (snapshot, &entry) != FALSE;
+    if (complete) do {
+      if (entry.th32OwnerProcessID == GetCurrentProcessId () &&
+          entry.th32ThreadID != GetCurrentThreadId ())
+      {
+        HANDLE thread = OpenThread (THREAD_SUSPEND_RESUME | THREAD_GET_CONTEXT |
+                                    THREAD_QUERY_INFORMATION, FALSE, entry.th32ThreadID);
+        if (thread == nullptr)
+        {
+          // Threads which exited after the snapshot need no suspension.
+          if (GetLastError () != ERROR_INVALID_PARAMETER)
+            complete = false;
+        }
+        else
+          threads.push_back ({ thread, false });
+      }
+      entry.dwSize = sizeof entry;
+    } while (Thread32Next (snapshot, &entry));
+    if (GetLastError () != ERROR_NO_MORE_FILES)
+      complete = false;
+    CloseHandle (snapshot);
+
+    if (! complete)
+      return;
+
+    for (auto& thread : threads)
+    {
+      if (SuspendThread (thread.handle) == static_cast <DWORD> (-1))
+        return;
+      thread.suspended = true;
+
+      CONTEXT context = { };
+      context.ContextFlags = CONTEXT_CONTROL;
+      if (! GetThreadContext (thread.handle, &context))
+        return;
+
+      const uintptr_t instruction = context.Eip;
+      const uintptr_t address = reinterpret_cast <uintptr_t> (patch);
+      // Never resume a thread in the middle of the replaced instructions.
+      if (instruction >= address && instruction < address + sizeof skip_audio)
+        return;
+    }
+
+    safe = true;
+  }
+
+  ~audio_thread_pause ()
+  {
+    for (auto& thread : threads)
+    {
+      if (thread.suspended)
+        ResumeThread (thread.handle);
+      CloseHandle (thread.handle);
+    }
+  }
+};
+
+bool
+SetAudioSkip (bool skip)
+{
+  const bool was_skipped = __UNX_skip_cutscenes.load ();
+  if (skip == was_skipped)
+    return true;
+  if (speed_targets.audio == nullptr)
+    return false;
+
+  const uint8_t* expected = was_skipped ? skip_audio : speed_targets.audio_original;
+  const uint8_t* replacement = skip ? skip_audio : speed_targets.audio_original;
+  bool success = false;
+  DWORD failure = ERROR_SUCCESS;
+  {
+    audio_thread_pause paused (speed_targets.audio);
+    if (paused.safe && unx::game_memory::IsReadable (speed_targets.audio, sizeof skip_audio) &&
+        memcmp (speed_targets.audio, expected, sizeof skip_audio) == 0)
+    {
+      DWORD protection = 0;
+      if (VirtualProtect (speed_targets.audio, sizeof skip_audio,
+                          PAGE_EXECUTE_READWRITE, &protection))
+      {
+        memcpy (speed_targets.audio, replacement, sizeof skip_audio);
+        __UNX_skip_cutscenes.store (skip);
+        success = FlushInstructionCache (GetCurrentProcess (), speed_targets.audio,
+                                         sizeof skip_audio) != FALSE;
+        if (! success)
+          failure = GetLastError ();
+        DWORD discarded = 0;
+        if (! VirtualProtect (speed_targets.audio, sizeof skip_audio, protection, &discarded))
+        {
+          failure = GetLastError ();
+          success = false;
+        }
+      }
+      else
+        failure = GetLastError ();
+    }
+  }
+
+  // Log after resuming threads, since a suspended thread may hold the log lock.
+  dll_log->Log (L"[Speed Hack] Audio skip %s: %s (error=%lu)",
+                skip ? L"on" : L"off", success ? L"applied" : L"unavailable", failure);
+  return success;
+}
+
+void
+InitSpeedTargets (void)
+{
+  speed_lock_guard lock;
+  using namespace unx::game_memory;
+  const SignatureMatch tick =
+    FindUniqueExecutableSignature (tick_signature, tick_mask, sizeof tick_signature);
+  const SignatureMatch audio =
+    FindUniqueExecutableSignature (audio_signature, nullptr, sizeof audio_signature);
+
+  dll_log->Log (L"[Speed Hack] GameTick=%p (matches=%zu), AudioSync=%p (matches=%zu)",
+                tick.address, tick.count, audio.address, audio.count);
+
+  // Both signatures start at a verified PUSH EBP / MOV EBP,ESP prologue.
+  if (audio.address != nullptr && memcmp (audio.address, audio_signature, 3) == 0)
+  {
+    speed_targets.audio = audio.address;
+    memcpy (speed_targets.audio_original, audio.address, sizeof speed_targets.audio_original);
+  }
+
+  if (tick.address != nullptr && memcmp (tick.address, tick_signature, 3) == 0)
+  {
+    const MH_STATUS status = UNX_CreateFuncHook (L"FFX_GameTick", tick.address,
+                 UNX_FFX_GameTick, reinterpret_cast <LPVOID*> (&UNX_FFX_GameTick_Original));
+    if (status == MH_OK && UNX_FFX_GameTick_Original != nullptr)
+    {
+      speed_targets.tick = tick.address;
+      speed_targets.hook_created = true;
+    }
+    else
+      dll_log->Log (L"[Speed Hack] GameTick hook creation failed (%d); speed boost disabled", status);
+  }
+}
+
+template <typename T>
+T*
+ResolveWritableOperand (const unx::game_memory::SignatureMatch& match,
+                        size_t offset, size_t length)
+{
+  if (match.address == nullptr)
+    return nullptr;
+  uint32_t address = 0;
+  memcpy (&address, match.address + offset, sizeof address);
+  T* target = reinterpret_cast <T*> (static_cast <uintptr_t> (address));
+  return unx::game_memory::IsWritableImageAddress (target, length) ? target : nullptr;
+}
+
+void
+InitAdditionalFFXTargets (void)
+{
+  using namespace unx::game_memory;
+  const SignatureMatch menu =
+    FindUniqueExecutableSignature (menu_signature, nullptr, sizeof menu_signature);
+  const SignatureMatch timestop =
+    FindUniqueExecutableSignature (timestop_signature, timestop_mask, sizeof timestop_signature);
+  const SignatureMatch kill =
+    FindUniqueExecutableSignature (kill_signature, nullptr, sizeof kill_signature);
+
+  cheat_targets.menu = reinterpret_cast <FFX_Menu_pfn> (menu.address);
+  cheat_targets.timestop = ResolveWritableOperand <uint8_t> (timestop, 7, 1);
+  if (cheat_targets.timestop != nullptr)
+  {
+    const uint8_t* second = ResolveWritableOperand <uint8_t> (timestop, 23, 1);
+    if (second != cheat_targets.timestop + 1)
+      cheat_targets.timestop = nullptr;
+  }
+  cheat_targets.kill_branch = kill.address;
+  dll_log->Log (L"[Cheat Code] Menu=%p, TimeStop=%p, KillBranch=%p",
+                menu.address, cheat_targets.timestop, kill.address);
+}
+
+void
+InitFFX2Targets (void)
+{
+  using namespace unx::game_memory;
+  const SignatureMatch debug = FindUniqueExecutableSignature (
+    ffx2_debug_signature, ffx2_debug_mask, sizeof ffx2_debug_signature);
+  const SignatureMatch party = FindUniqueExecutableSignature (
+    ffx2_party_signature, ffx2_party_mask, sizeof ffx2_party_signature);
+  const SignatureMatch death = FindUniqueExecutableSignature (
+    ffx2_death_signature, ffx2_death_mask, sizeof ffx2_death_signature);
+
+  ffx2.debug_flags = ResolveWritableOperand <unx_ffx2_memory_s::debug_s> (
+    debug, 2, sizeof *ffx2.debug_flags);
+  ffx2.party = ResolveWritableOperand <unx_ffx2_memory_s::party_s> (
+    party, 5, sizeof *ffx2.party * 8);
+  cheat_targets.ffx2_death = ResolveWritableOperand <uint8_t> (death, 2, sizeof (uint32_t));
+  dll_log->Log (L"[Cheat Code] FFX-2 Debug=%p, Party=%p, Death=%p",
+                ffx2.debug_flags, ffx2.party, cheat_targets.ffx2_death);
+}
+
+bool
+SetKillBranch (bool bypass)
+{
+  uint8_t* branch = cheat_targets.kill_branch;
+  if (branch == nullptr || ! unx::game_memory::IsReadable (branch, sizeof kill_signature))
+    return false;
+
+  const uint8_t expected = bypass ? 0x7e : 0xeb;
+  const uint8_t replacement = bypass ? 0xeb : 0x7e;
+  // Only the one-byte condition changes; instruction boundaries and its short
+  // displacement remain intact. Refuse to overwrite a third-party patch.
+  if (*branch != expected || memcmp (branch + 1, kill_signature + 1, sizeof kill_signature - 1) != 0)
+    return false;
+
+  DWORD protection = 0;
+  if (! VirtualProtect (branch, 1, PAGE_EXECUTE_READWRITE, &protection))
+    return false;
+  *branch = replacement;
+  const bool flushed = FlushInstructionCache (GetCurrentProcess (), branch, 1) != FALSE;
+  const DWORD flush_error = flushed ? ERROR_SUCCESS : GetLastError ();
+  DWORD discarded = 0;
+  const bool restored = VirtualProtect (branch, 1, protection, &discarded) != FALSE;
+  const DWORD protection_error = restored ? ERROR_SUCCESS : GetLastError ();
+  if (flushed && restored)
+    return true;
+
+  if (bypass)
+  {
+    // The caller only schedules the delayed restore after successful activation.
+    // Undo a partially applied activation here so a cleanup error cannot leave
+    // the unconditional branch enabled indefinitely.
+    DWORD rollback_protection = 0;
+    bool rollback = VirtualProtect (branch, 1, PAGE_EXECUTE_READWRITE,
+                                    &rollback_protection) != FALSE;
+    DWORD rollback_error = rollback ? ERROR_SUCCESS : GetLastError ();
+    if (rollback)
+    {
+      *branch = expected;
+      rollback = FlushInstructionCache (GetCurrentProcess (), branch, 1) != FALSE;
+      if (! rollback)
+        rollback_error = GetLastError ();
+      if (! VirtualProtect (branch, 1, protection, &discarded))
+      {
+        rollback_error = GetLastError ();
+        rollback = false;
+      }
+    }
+    dll_log->Log (L"[Cheat Code] Kill bypass activation failed (flush=%lu, protection=%lu); "
+                  L"rollback %s (error=%lu)", flush_error, protection_error,
+                  rollback ? L"completed" : L"FAILED", rollback_error);
+  }
+  // A failed deactivation must keep the restored conditional branch (0x7e).
+  return false;
+}
+
+void
+ApplySpeed (float speed)
+{
+  const bool enable = speed != 1.0f;
+  if (enable != speed_targets.hook_enabled)
+  {
+    if (! enable)
+      __UNX_speed_mod.store (1.0f);
+    const MH_STATUS status = enable ? UNX_EnableHook (speed_targets.tick) :
+                                     UNX_DisableHook (speed_targets.tick);
+    if (status == MH_OK || (enable && status == MH_ERROR_ENABLED) ||
+                          (! enable && status == MH_ERROR_DISABLED))
+      speed_targets.hook_enabled = enable;
+    else
+    {
+      dll_log->Log (L"[Speed Hack] GameTick %s failed (%d)", enable ? L"enable" : L"disable", status);
+      speed = 1.0f;
+    }
+  }
+
+  __UNX_speed_mod.store (speed);
+  const float threshold = config.cheat.ffx.skip_dialog;
+  SetAudioSkip (! config.cheat.ffx.disable_timing_hacks && _finite (threshold) && speed >= threshold);
+  last_changed.speed = timeGetTime ();
+  dll_log->Log (L"[Speed Hack] Speed=%.1fx, hook=%s, audio-skip=%s", speed,
+                speed_targets.hook_enabled ? L"on" : L"off",
+                __UNX_skip_cutscenes.load () ? L"on" : L"off");
+}
+
+} // namespace
+
 void
 UNX_SpeedStep (void)
 {
-  last_changed.speed = timeGetTime ();
+  speed_lock_guard lock;
+  if (game_type != GAME_FFX || ! speed_targets.hook_created)
+    return;
 
-  if (__UNX_speed_mod < config.cheat.ffx.max_speed)
-    __UNX_speed_mod *= config.cheat.ffx.speed_step;
-  else
-    __UNX_speed_mod = 1.0f;
-
-
-  static volatile ULONG enabled = FALSE;
-
-  if (__UNX_speed_mod != 1.0f && (! config.cheat.ffx.disable_timing_hacks))
+  float speed = 1.0f;
+  const float limit = config.cheat.ffx.max_speed;
+  const float step = config.cheat.ffx.speed_step;
+  const float current = __UNX_speed_mod.load ();
+  if (! config.cheat.ffx.disable_timing_hacks &&
+      _finite (limit) && limit > 1.0f && _finite (step) && step > 1.0f && current < limit)
   {
-    if (! InterlockedCompareExchange (&enabled, TRUE, FALSE))
-    {
-      UNX_EnableHook  ((LPVOID)((intptr_t)__UNX_base_img_addr + 0x420C00));
-    }
+    const double next = static_cast <double> (current) * step;
+    speed = next < limit ? static_cast <float> (next) : limit;
   }
-
-  else
-  {
-    if (InterlockedCompareExchange (&enabled, FALSE, TRUE))
-    {
-      UNX_DisableHook ((LPVOID)( (intptr_t)__UNX_base_img_addr + 0x420C00 ));
-    }
-  }
-  
-
-  if (__UNX_speed_mod >= config.cheat.ffx.skip_dialog)
-  {
-    UNX_FFX_AudioSkip (true);
-  } else {
-    UNX_FFX_AudioSkip (false);
-  }
+  ApplySpeed (speed);
 }
 
 void
 UNX_UpdateSpeedLimit (void)
 {
-  float step = config.cheat.ffx.speed_step;
-               config.cheat.ffx.speed_step = 1.0f;
+  speed_lock_guard lock;
+  if (game_type != GAME_FFX || ! speed_targets.hook_created)
+    return;
 
-  UNX_SpeedStep ();
-
-  config.cheat.ffx.speed_step = step;
+  const float limit = config.cheat.ffx.max_speed;
+  float speed = __UNX_speed_mod.load ();
+  if (config.cheat.ffx.disable_timing_hacks || ! _finite (limit) || limit < 1.0f)
+    speed = 1.0f;
+  else if (speed > limit)
+    speed = limit;
+  ApplySpeed (speed);
 }
 
 void
 __cdecl
 UNX_FFX_GameTick (float fSpeed)
 {
-  UNX_FFX_GameTick_Original (fSpeed * __UNX_speed_mod);
+  if (UNX_FFX_GameTick_Original != nullptr)
+    UNX_FFX_GameTick_Original (fSpeed * __UNX_speed_mod.load ());
 }
 
 #if 0
@@ -538,10 +815,23 @@ unx::CheatManager::Init (void)
       (unx_ffx_memory_s::ap_s *)
         ((intptr_t)__UNX_base_img_addr + ffx.offsets.GainedAp);
 
-    UNX_CreateFuncHook ( L"FFX_GameTick",
-        (LPVOID)((intptr_t)__UNX_base_img_addr + 0x420C00),
-                             UNX_FFX_GameTick,
-                  (LPVOID *)&UNX_FFX_GameTick_Original );
+    using unx::game_memory::IsWritableImageAddress;
+    if (! IsWritableImageAddress (ffx.debug_flags, sizeof *ffx.debug_flags))
+      ffx.debug_flags = nullptr;
+    if (! IsWritableImageAddress (ffx.party, sizeof *ffx.party * 8))
+      ffx.party = nullptr;
+    if (! IsWritableImageAddress (ffx.battle, sizeof *ffx.battle * 8))
+      ffx.battle = nullptr;
+    if (! IsWritableImageAddress (ffx.trio, sizeof *ffx.trio * 3))
+      ffx.trio = nullptr;
+    if (! IsWritableImageAddress (ffx.ap, sizeof *ffx.ap * 8))
+      ffx.ap = nullptr;
+    if (ffx.debug_flags == nullptr || ffx.party == nullptr ||
+        ffx.battle == nullptr || ffx.ap == nullptr)
+      dll_log->Log (L"[Cheat Code] Invalid FFX data range; affected cheats disabled");
+
+    InitSpeedTargets ();
+    InitAdditionalFFXTargets ();
 
 #if 0
     UNX_CreateFuncHook ( L"FFX_LoadLevel",
@@ -567,15 +857,10 @@ unx::CheatManager::Init (void)
 
     game_type = GAME_FFX2;
 
-    ffx2.debug_flags =
-      (unx_ffx2_memory_s::debug_s *)
-        ((intptr_t)__UNX_base_img_addr + ffx2.offsets.Debug);
+    InitFFX2Targets ();
 
-    ffx2.party =
-      (unx_ffx2_memory_s::party_s *)
-        ((intptr_t)__UNX_base_img_addr + ffx2.offsets.PartyStats);
-
-    ffx2.debug_flags->debug_output = true;
+    if (ffx2.debug_flags != nullptr)
+      ffx2.debug_flags->debug_output = true;
 
     SetTimer (unx::window.hwnd, CHEAT_TIMER_FFX2, 33, nullptr);
 
@@ -608,7 +893,7 @@ UNX_TogglePartyAP (void)
 void
 UNX_ToggleFreeLook (void)
 {
-  if (game_type != GAME_FFX)
+  if (game_type != GAME_FFX || ffx.debug_flags == nullptr)
     return;
 
   ffx.debug_flags->control.camera =
@@ -623,8 +908,9 @@ UNX_SetSensor (bool state)
 
   config.cheat.ffx.permanent_sensor = state;
 
-  ffx.debug_flags->permanent_sensor =
-    (uint8_t)config.cheat.ffx.permanent_sensor;
+  if (game_type == GAME_FFX && ffx.debug_flags != nullptr)
+    ffx.debug_flags->permanent_sensor =
+      (uint8_t)config.cheat.ffx.permanent_sensor;
 }
 
 void
@@ -639,68 +925,29 @@ UNX_ToggleSensor (void)
 void
 UNX_TimeStop (void)
 {
-  if (game_type != GAME_FFX)
+  if (game_type != GAME_FFX || cheat_targets.timestop == nullptr)
     return;
 
-  DWORD dwProtect;
-
-  // Timestop actually (0x12FBB63)
-
-  uint8_t* skip = (uint8_t *)((intptr_t)__UNX_base_img_addr + 0x12FBB63 - 0x400000);
-
-  VirtualProtect ((LPVOID)skip, 0x1, PAGE_READWRITE, &dwProtect);
-    *skip = ! (*skip);
-  VirtualProtect ((LPVOID)skip, 0x1, dwProtect,      &dwProtect);
-
+  if (unx::game_memory::IsWritableImageAddress (cheat_targets.timestop, 1))
+    *cheat_targets.timestop = ! *cheat_targets.timestop;
 }
 // Quick Load
 void
 UNX_Quickie (void)
 {
-#if 0
-      DWORD     dwProtect;
-#if 0
-      uint32_t* skip = (uint32_t *)((intptr_t)__UNX_base_img_addr + 0x12FB7C0 - 0x400000);
-
-      VirtualProtect ((LPVOID)skip, 4, PAGE_READWRITE, &dwProtect);
-        *skip = 1;
-      VirtualProtect ((LPVOID)skip, 4, dwProtect,      &dwProtect);
-#else
-      // Timestop actually (0x12FBB63)
-
-      uint8_t* skip = (uint8_t *)((intptr_t)__UNX_base_img_addr + 0x12FBB60 - 0x400000);
-
-      VirtualProtect ((LPVOID)skip, 0x13, PAGE_READWRITE, &dwProtect);
-        for (int i = 0; i < 0x13; i++) {
-          //*(skip+i) = ! *(skip+i);
-        }
-      VirtualProtect ((LPVOID)skip, 0x13, dwProtect,      &dwProtect);
-#endif
-
-  typedef int (*sub_786BC0_pfn)(void);
-  sub_786BC0_pfn QuickSave = nullptr;
-
-  QuickSave = (sub_786BC0_pfn)((intptr_t)__UNX_base_img_addr + 0x786BC0 - 0x400000);
-  QuickSave ();
-
-#else
-  if (game_type != GAME_FFX)
+  if (game_type != GAME_FFX || cheat_targets.menu == nullptr)
     return;
 
-  using sub_7C8650_pfn = int (__cdecl *)(int);
-  sub_7C8650_pfn Menu =
-    (sub_7C8650_pfn)((intptr_t)__UNX_base_img_addr + 0x3C8650);
-  Menu (0x6);
+  cheat_targets.menu (0x6);
 
   extern volatile ULONG schedule_load;
   InterlockedExchange (&schedule_load, TRUE);
-#endif
 }
 
 bool
 UNX_IsInBattle (void)
 {
-  if (game_type != GAME_FFX)
+  if (game_type != GAME_FFX || ffx.party == nullptr || ffx.battle == nullptr)
     return false;
 
   for (int i = 0; i < 7; i++) {
@@ -724,29 +971,32 @@ UNX_KillMeNow (void)
     {
       if (UNX_IsInBattle ())
       {
+        if (! SetKillBranch (true))
+          return false;
+
         for (int i = 0; i < 8; i++) {
           ffx.party [i].vitals.current.HP = 0UL;
         }
 
-        // Kill
-        SK_GetCommandProcessor ()->ProcessCommandLine ("mem s 392930 1deb");
-
         // Spawn thread to restore original instructions
-        CreateThread (nullptr, 0,
+        HANDLE restore_thread = CreateThread (nullptr, 0,
           [](LPVOID) ->
             DWORD
               {
                 Sleep (5000UL);
-
-                SK_GetCommandProcessor ()->ProcessCommandLine ("mem s 392930 1d7e");
-
-                CloseHandle (GetCurrentThread ());
-
+                if (! SetKillBranch (false))
+                  dll_log->Log (L"[Cheat Code] Could not restore the kill branch");
                 return 0;
               },
             nullptr,
           0x00,
         nullptr );
+        if (restore_thread == nullptr)
+        {
+          SetKillBranch (false);
+          return false;
+        }
+        CloseHandle (restore_thread);
 
         return true;
       }
@@ -757,13 +1007,15 @@ UNX_KillMeNow (void)
 
     case GAME_FFX2:
     {
+      if (ffx2.party == nullptr || cheat_targets.ffx2_death == nullptr)
+        return false;
       for (int i = 0; i < 8; i++) {
         ffx2.party [i].vitals.current.HP = 0UL;
       }
 
-      SK_GetCommandProcessor ()->ProcessCommandLine ("mem b 9F7880 1");
+      *cheat_targets.ffx2_death = 1;
       Sleep (33);
-      SK_GetCommandProcessor ()->ProcessCommandLine ("mem b 9F7880 0");
+      *cheat_targets.ffx2_death = 0;
       Sleep (0);
     } break;
   }
@@ -780,7 +1032,8 @@ unx::CheatTimer_FFX (void)
   if (config.cheat.ffx.permanent_sensor)
     UNX_SetSensor (config.cheat.ffx.permanent_sensor);
 
-  DWORD dwProtect;
+  if (ffx.party == nullptr)
+    return;
 
   if (config.cheat.ffx.playable_seymour) {
     ffx.party [ffx.characters.Seymour].in_party = 0x11;
@@ -788,9 +1041,7 @@ unx::CheatTimer_FFX (void)
     ffx.party [ffx.characters.Seymour].in_party = 0x10;
   }
 
-  if (config.cheat.ffx.entire_party_earns_ap && UNX_IsInBattle ()) {
-    VirtualProtect (&ffx.battle->participation, 8, PAGE_READWRITE, &dwProtect);
-
+  if (config.cheat.ffx.entire_party_earns_ap && ffx.ap != nullptr && UNX_IsInBattle ()) {
       for (int i = 0; i < 7; i++) {
         uint8_t state = ffx.party [i].in_party;
 
@@ -802,9 +1053,6 @@ unx::CheatTimer_FFX (void)
         }
       }
 
-    VirtualProtect (&ffx.battle->participation, 8, dwProtect,      &dwProtect);
-    VirtualProtect (&ffx.ap->earn,              8, PAGE_READWRITE, &dwProtect);
-
       for (int i = 0; i < 7; i++) {
         uint8_t state = ffx.party [i].in_party;
 
@@ -814,21 +1062,20 @@ unx::CheatTimer_FFX (void)
           ffx.ap [i].earn = 0;
       }
 
-    VirtualProtect (&ffx.ap->earn, 8, dwProtect, &dwProtect);
   }
 }
 
 void
 unx::CheatTimer_FFX2 (void)
 {
-  if (game_type != GAME_FFX2)
+  if (game_type != GAME_FFX2 || ffx2.party == nullptr)
     return;
 }
 
 void
 UNX_FFX2_UnitTest (void)
 {
-  if (game_type != GAME_FFX2)
+  if (game_type != GAME_FFX2 || ffx2.party == nullptr)
     return;
 
   //ffx2.party->exp.current != 0;
@@ -873,23 +1120,25 @@ UNX_SummarizeCheats (DWORD dwTime)
         char szGameSpeed [128] = { };
 
         sprintf ( szGameSpeed, "Game Speed:       %4.1fx\n",
-                    __UNX_speed_mod );
+                    __UNX_speed_mod.load () );
         summary += szGameSpeed;
       }
 
-      uint8_t* skip = (uint8_t *)((intptr_t)__UNX_base_img_addr + 0x12FBB63 - 0x400000);
+      const bool free_look = ffx.debug_flags != nullptr && ffx.debug_flags->control.camera;
+      const bool timestop = cheat_targets.timestop != nullptr && *cheat_targets.timestop;
+      const bool skip_cutscenes = __UNX_skip_cutscenes.load ();
 
-      if (ffx.debug_flags->control.camera || *skip || __UNX_skip_cutscenes)
+      if (free_look || timestop || skip_cutscenes)
       {
         summary += "SPECIAL MODE:     ";
 
-        if (ffx.debug_flags->control.camera)
+        if (free_look)
           summary += "(Free Look) ";
 
-        if (*skip)
+        if (timestop)
           summary += "(Timestop) ";
 
-        if (__UNX_skip_cutscenes)
+        if (skip_cutscenes)
           summary += "(Cutscene Skip) ";
 
         summary += "\n";
